@@ -1,0 +1,11 @@
+{
+  "Version": 3,
+  "ListAllProjects": false,
+  "MultiProjectConfigurations": {
+    "Tharga.Blazor1": {
+      "Projects": {
+        "Tharga.Blazor1": {}
+      }
+    }
+  }
+}

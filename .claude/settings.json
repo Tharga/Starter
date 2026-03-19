@@ -3,35 +3,17 @@
     "commit": "",
     "pr": ""
   },
-  "env": {
-  },
   "permissions": {
     "allow": [
-      "Read",
-      "Write",
-      "Edit",
-      "Glob",
-      "Grep",
-      "Bash(dotnet:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git checkout:*)",
-      "Bash(git branch:*)",
-      "Bash(git merge:*)",
-      "Bash(git stash:*)",
-      "Bash(git -C:*)",
-      "Bash(py:*)",
-      "Bash(curl -s:*)",
-      "Bash(ls:*)",
-      "Skill(update-config:*)"
+      "Bash(dotnet new:*)",
+      "Bash(dotnet test:*)",
+      "Read(//c/Users/danie/SynologyDrive/Documents/Notes/Tharga/**)",
+      "Bash(cp .claude/feature.md .claude/features-done/blazor-ui-foundation.md)",
+      "Bash(rm .claude/feature.md .claude/plan.md)"
     ],
-    "deny": [
-      "Bash(git push:*)",
-      "Bash(git push)"
+    "deny": [],
+    "additionalDirectories": [
+      "c:\\dev\\tharga\\Starter\\.claude\\features-done"
     ]
-  },
-  "effortLevel": "high"
+  }
 }

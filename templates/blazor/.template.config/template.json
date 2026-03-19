@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Tharga",
+  "classifications": ["Web", "Blazor", "Tharga"],
+  "identity": "Tharga.Blazor",
+  "name": "Tharga Blazor Web App",
+  "shortName": "tharga-blazor",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "sourceName": "Tharga.Blazor1",
+  "preferNameDirectory": true,
+  "symbols": {
+    "IncludeSamples": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include sample pages (Counter, Weather)"
+    }
+  },
+  "guids": [],
+  "specialCustomOperations": {
+    "**/*.razor": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "style": "line",
+            "token": "//-"
+          }
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/.vs/**"
+          ]
+        },
+        {
+          "condition": "(!IncludeSamples)",
+          "exclude": [
+            "Tharga.Blazor1.Client/Pages/Counter.razor",
+            "Tharga.Blazor1/Components/Pages/Weather.razor"
+          ]
+        }
+      ]
+    }
+  ]
+}
