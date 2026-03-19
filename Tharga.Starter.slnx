@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Tharga.Starter.csproj" />
+  <Project Path="tests/Tharga.Starter.Tests/Tharga.Starter.Tests.csproj" />
+</Solution>
