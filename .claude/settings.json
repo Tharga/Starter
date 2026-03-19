@@ -5,8 +5,15 @@
   },
   "permissions": {
     "allow": [
+      "Bash(dotnet new:*)",
+      "Bash(dotnet test:*)",
+      "Read(//c/Users/danie/SynologyDrive/Documents/Notes/Tharga/**)",
+      "Bash(cp .claude/feature.md .claude/features-done/blazor-ui-foundation.md)",
+      "Bash(rm .claude/feature.md .claude/plan.md)"
     ],
-    "deny": [
+    "deny": [],
+    "additionalDirectories": [
+      "c:\\dev\\tharga\\Starter\\.claude\\features-done"
     ]
   }
 }

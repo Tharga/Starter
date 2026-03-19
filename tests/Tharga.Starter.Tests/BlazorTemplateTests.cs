@@ -102,6 +102,26 @@ public class BlazorTemplateTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task NavMenuDoesNotContainTemplateDirectives()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNavCheck");
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNavCheck", "Components", "Layout", "NavMenu.razor"));
+        Assert.DoesNotContain("//-", navMenu);
+        Assert.DoesNotContain("#if", navMenu);
+        Assert.DoesNotContain("#endif", navMenu);
+    }
+
+    [Fact]
+    public async Task NavMenuExcludesSampleLinksWhenOptionIsFalse()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNavNoSamp", "--IncludeSamples false");
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNavNoSamp", "Components", "Layout", "NavMenu.razor"));
+        Assert.DoesNotContain("Counter", navMenu);
+        Assert.DoesNotContain("Weather", navMenu);
+        Assert.DoesNotContain("//-", navMenu);
+    }
+
+    [Fact]
     public async Task ContainsAboutPage()
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorAbout");

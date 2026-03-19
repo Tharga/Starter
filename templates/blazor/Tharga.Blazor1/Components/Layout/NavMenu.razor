@@ -12,10 +12,10 @@
 <RadzenSidebar Responsive="false" Style="width: max-content">
     <RadzenPanelMenu DisplayStyle="@(_menuExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="false">
         <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
-#if (IncludeSamples)
+//-#if (IncludeSamples)
         <RadzenPanelMenuItem Text="Counter" Icon="exposure_plus_1" Path="/counter" />
         <RadzenPanelMenuItem Text="Weather" Icon="weather_mix" Path="/weather" />
-#endif
+//-#endif
         <RadzenPanelMenuItem Text="About" Icon="info" Path="/about" />
     </RadzenPanelMenu>
 </RadzenSidebar>

@@ -19,6 +19,20 @@
       "description": "Include sample pages (Counter, Weather)"
     }
   },
+  "guids": [],
+  "specialCustomOperations": {
+    "**/*.razor": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "style": "line",
+            "token": "//-"
+          }
+        }
+      ]
+    }
+  },
   "sources": [
     {
       "modifiers": [
