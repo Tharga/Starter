@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Tharga",
+  "classifications": ["Web", "Blazor", "Tharga"],
+  "identity": "Tharga.Blazor",
+  "name": "Tharga Blazor Web App",
+  "shortName": "tharga-blazor",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "sourceName": "Tharga.Blazor1",
+  "preferNameDirectory": true,
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/.vs/**"
+          ]
+        }
+      ]
+    }
+  ]
+}
