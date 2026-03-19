@@ -1,5 +1,11 @@
 {
-  "startup_profiles": {
-    "Tharga.Console1": {}
+  "Version": 3,
+  "ListAllProjects": false,
+  "MultiProjectConfigurations": {
+    "Tharga.Console1": {
+      "Projects": {
+        "Tharga.Console1": {}
+      }
+    }
   }
 }

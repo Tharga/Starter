@@ -11,6 +11,14 @@
   },
   "sourceName": "Tharga.Console1",
   "preferNameDirectory": true,
+  "symbols": {
+    "IncludeSample": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include sample command code"
+    }
+  },
   "sources": [
     {
       "modifiers": [
@@ -19,6 +27,12 @@
             "**/bin/**",
             "**/obj/**",
             "**/.vs/**"
+          ]
+        },
+        {
+          "condition": "(!IncludeSample)",
+          "exclude": [
+            "**/Commands/**"
           ]
         }
       ]

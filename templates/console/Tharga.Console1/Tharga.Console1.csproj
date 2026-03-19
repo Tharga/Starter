@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Tharga.Console" Version="3.*" />
+  </ItemGroup>
+
 </Project>
