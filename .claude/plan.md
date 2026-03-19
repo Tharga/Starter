@@ -1,13 +1,12 @@
-# Plan: Console Template
+# Plan: Blazor Web App Template
 
 ## Steps
 
-- [x] 1. Create feature branch `feature/console-template`
-- [x] 2. Create the template pack project `Tharga.Starter.csproj` at repo root
-- [x] 3. Scaffold the console app project under `templates/console/Tharga.Console1/`
-- [x] 4. Scaffold the test project under `templates/console/Tharga.Console1.Tests/`
-- [x] 5. Create the solution file `templates/console/Tharga.Console1.slnx` linking both projects
-- [x] 6. Create `.template.config/template.json` with name substitution and metadata
-- [x] 7. Verify: install template locally and generate a project — worked, name substitution correct
-- [x] 8. Verify: build and test the generated project — build succeeded, 1 test passed
-- [ ] 9. Commit all changes
+- [x] 1. Create feature branch `feature/blazor-template`
+- [x] 2. Scaffold Blazor Web App (Auto render mode) with server and client projects under `templates/blazor/`
+- [x] 3. Add test project under `templates/blazor/Tharga.Blazor1.Tests/`
+- [x] 4. Create solution file linking all projects
+- [x] 5. Create `.template.config/template.json` with `tharga-blazor` short name and name substitution
+- [x] 6. Add integration tests in `tests/Tharga.Starter.Tests/` for the blazor template
+- [x] 7. Verify: install template, generate project, build and test — all 11 tests pass
+- [~] 8. Commit all changes
