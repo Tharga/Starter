@@ -11,6 +11,14 @@
   },
   "sourceName": "Tharga.Blazor1",
   "preferNameDirectory": true,
+  "symbols": {
+    "IncludeSamples": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include sample pages (Counter, Weather)"
+    }
+  },
   "sources": [
     {
       "modifiers": [
@@ -19,6 +27,13 @@
             "**/bin/**",
             "**/obj/**",
             "**/.vs/**"
+          ]
+        },
+        {
+          "condition": "(!IncludeSamples)",
+          "exclude": [
+            "Tharga.Blazor1.Client/Pages/Counter.razor",
+            "Tharga.Blazor1/Components/Pages/Weather.razor"
           ]
         }
       ]

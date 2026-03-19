@@ -31,6 +31,6 @@ public class HomePageTests : IClassFixture<WebApplicationFactory<Program>>
         var response = await client.GetAsync("/");
         var content = await response.Content.ReadAsStringAsync();
 
-        Assert.Contains("Hello, world!", content);
+        Assert.Contains("blazor.web.js", content);
     }
 }

@@ -1,5 +1,7 @@
-using Tharga.Blazor1.Client.Pages;
 using Tharga.Blazor1.Components;
+using Tharga.Blazor1.Framework;
+using Radzen;
+using Tharga.Blazor.Framework;
 
 namespace Tharga.Blazor1;
 
@@ -9,14 +11,24 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents()
             .AddInteractiveWebAssemblyComponents();
 
+        builder.Services.AddRadzenComponents();
+        builder.Services.AddRadzenCookieThemeService(options =>
+        {
+            options.Name = Constants.ThemeStorageName;
+            options.Duration = TimeSpan.FromDays(365);
+        });
+
+        builder.Services.AddThargaBlazor(o =>
+        {
+            o.Title = "Tharga.Blazor1";
+        });
+
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseWebAssemblyDebugging();

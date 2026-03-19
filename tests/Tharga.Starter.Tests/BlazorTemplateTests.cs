@@ -73,4 +73,47 @@ public class BlazorTemplateTests : IAsyncLifetime
         Assert.True(File.Exists(Path.Combine(projectPath, "BlazorIntTest.IntegrationTests", "BlazorIntTest.IntegrationTests.csproj")),
             "Integration test project file should exist");
     }
+
+    [Fact]
+    public async Task DefaultIncludesSamplePages()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorSamples");
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorSamples.Client", "Pages", "Counter.razor")),
+            "Counter page should exist by default");
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorSamples", "Components", "Pages", "Weather.razor")),
+            "Weather page should exist by default");
+    }
+
+    [Fact]
+    public async Task ExcludesSamplesWhenOptionIsFalse()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoSamples", "--IncludeSamples false");
+        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamples.Client", "Pages", "Counter.razor")),
+            "Counter page should not exist when IncludeSamples is false");
+        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamples", "Components", "Pages", "Weather.razor")),
+            "Weather page should not exist when IncludeSamples is false");
+    }
+
+    [Fact]
+    public async Task BuildsWithoutSamples()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoSamplesBuild", "--IncludeSamples false");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+    }
+
+    [Fact]
+    public async Task ContainsAboutPage()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorAbout");
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorAbout", "Components", "Pages", "About.razor")),
+            "About page should exist");
+    }
+
+    [Fact]
+    public async Task ContainsThargaBlazorPackageReference()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorPkgRef");
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorPkgRef", "BlazorPkgRef.csproj"));
+        Assert.Contains("Tharga.Blazor", csproj);
+    }
 }

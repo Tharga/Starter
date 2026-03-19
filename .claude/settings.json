@@ -3,35 +3,10 @@
     "commit": "",
     "pr": ""
   },
-  "env": {
-  },
   "permissions": {
     "allow": [
-      "Read",
-      "Write",
-      "Edit",
-      "Glob",
-      "Grep",
-      "Bash(dotnet:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git checkout:*)",
-      "Bash(git branch:*)",
-      "Bash(git merge:*)",
-      "Bash(git stash:*)",
-      "Bash(git -C:*)",
-      "Bash(py:*)",
-      "Bash(curl -s:*)",
-      "Bash(ls:*)",
-      "Skill(update-config:*)"
     ],
     "deny": [
-      "Bash(git push:*)",
-      "Bash(git push)"
     ]
-  },
-  "effortLevel": "high"
+  }
 }
