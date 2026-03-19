@@ -63,4 +63,14 @@ public class BlazorTemplateTests : IAsyncLifetime
         Assert.True(File.Exists(Path.Combine(projectPath, "BlazorTestProj.Tests", "BlazorTestProj.Tests.csproj")),
             "Test project file should exist");
     }
+
+    [Fact]
+    public async Task ContainsIntegrationTestProject()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorIntTest");
+        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorIntTest.IntegrationTests")),
+            "Integration test project folder should exist");
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorIntTest.IntegrationTests", "BlazorIntTest.IntegrationTests.csproj")),
+            "Integration test project file should exist");
+    }
 }

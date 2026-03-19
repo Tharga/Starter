@@ -9,4 +9,7 @@
 - [x] 5. Create `.template.config/template.json` with `tharga-blazor` short name and name substitution
 - [x] 6. Add integration tests in `tests/Tharga.Starter.Tests/` for the blazor template
 - [x] 7. Verify: install template, generate project, build and test — all 11 tests pass
-- [~] 8. Commit all changes
+- [x] 8. Commit all changes
+- [x] 9. Remove `<Nullable>enable</Nullable>` from all template projects — fixed nullable warnings in razor files
+- [x] 10. Add integration test project with WebApplicationFactory to blazor template
+- [~] 11. Verify and commit
