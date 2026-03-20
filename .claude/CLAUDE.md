@@ -82,5 +82,6 @@ When all planned steps are done:
 - All tests pass
 - `.claude/feature.md` is archived to `.claude/features-done/<feature-name>.md` and both `.claude/feature.md` and `.claude/plan.md` should be deleted
 - Remove the corresponding file from `.claude/features-planned/` if one exists
-- A final commit is made with message: `feat: <feature-name> complete`
+- The feature closure (archive, cleanup) must be its own dedicated commit with message: `feat: <feature-name> complete`
+- Do not combine the closure commit with other code changes — it should only contain the feature file archival and cleanup
 - Merge to originating branch and delete feature branch only when the user explicitly asks
