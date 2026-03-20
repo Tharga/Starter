@@ -37,13 +37,22 @@ The templates build on the Tharga and Quilt4Net package ecosystem. Each feature 
 | 7 | MongoDB | `Tharga.MongoDB.Blazor` | 3 | [Tharga/MongoDB](https://github.com/Tharga/MongoDB) | |
 | 8 | Team Management | `Tharga.Team.MongoDB` | 3, 7 | [Tharga/Platform](https://github.com/Tharga/Platform) | |
 | 9 | API Controllers | `Tharga.Blazor` (Tharga.Api) | 3 | [Tharga/Platform](https://github.com/Tharga/Platform) | |
-| 10 | Rate Limiting | Built-in | — | — | |
+| 10 | Rate Limiting | Built-in | — | — | opt |
 | 11 | Scopes | `Tharga.Blazor` (Tharga.Api) | 3, 8 | [Tharga/Platform](https://github.com/Tharga/Platform) | |
 | 12 | Team Roles | `Tharga.Blazor` (Tharga.Api) | 11 | [Tharga/Platform](https://github.com/Tharga/Platform) | |
 | 13 | Audit Logging | `Tharga.Blazor` (Tharga.Api) | 7, 8 | [Tharga/Platform](https://github.com/Tharga/Platform) | |
-| 14 | Health Endpoints | `Quilt4Net.Toolkit.Health` | — | [Quilt4/Quilt4Net.Toolkit](https://github.com/Quilt4/Quilt4Net.Toolkit) | |
+| 14 | Health Endpoints | `Quilt4Net.Toolkit.Health` | — | [Quilt4/Quilt4Net.Toolkit](https://github.com/Quilt4/Quilt4Net.Toolkit) | opt |
 
-As more template variants are added (e.g. `tharga-blazor-auth`, `tharga-blazor-full`), additional columns will show which features each template includes.
+**Legend:** `x` = included by default, `opt` = optional flag
+
+Optional flags: `--IncludeHealth true`, `--IncludeRateLimiting true`
+
+For detailed package documentation, see:
+- [Tharga Platform](https://github.com/Tharga/Platform) — Tharga.Blazor, authentication, team management, API controllers, scopes, audit
+- [Quilt4Net.Toolkit](https://github.com/Quilt4/Quilt4Net.Toolkit) — health endpoints, logging, remote configuration, content
+- [Tharga MongoDB](https://github.com/Tharga/MongoDB) — MongoDB integration
+
+As more template variants are added (e.g. `tharga-blazor-platform`, `tharga-blazor-full`), additional columns will show which features each template includes.
 
 ### Dependency graph
 

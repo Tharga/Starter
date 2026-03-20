@@ -136,4 +136,74 @@ public class BlazorTemplateTests : IAsyncLifetime
         var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorPkgRef", "BlazorPkgRef.csproj"));
         Assert.Contains("Tharga.Blazor", csproj);
     }
+
+    [Fact]
+    public async Task BuildsWithHealth()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealth", "--IncludeHealth true");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+    }
+
+    [Fact]
+    public async Task BuildsWithRateLimiting()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorRateLimit", "--IncludeRateLimiting true");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+    }
+
+    [Fact]
+    public async Task BuildsWithHealthAndRateLimiting()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorBoth", "--IncludeHealth true --IncludeRateLimiting true");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+    }
+
+    [Fact]
+    public async Task HealthIncludesPackageReference()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealthPkg", "--IncludeHealth true");
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorHealthPkg", "BlazorHealthPkg.csproj"));
+        Assert.Contains("Quilt4Net.Toolkit.Health", csproj);
+    }
+
+    [Fact]
+    public async Task DefaultExcludesHealthPackageReference()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoHealth");
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNoHealth", "BlazorNoHealth.csproj"));
+        Assert.DoesNotContain("Quilt4Net.Toolkit.Health", csproj);
+    }
+
+    [Fact]
+    public async Task HealthIncludesRegistrationInProgram()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealthProg", "--IncludeHealth true");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorHealthProg", "Program.cs"));
+        Assert.Contains("AddQuilt4NetHealth", program);
+        Assert.Contains("UseQuilt4NetHealth", program);
+        Assert.DoesNotContain("#if", program);
+        Assert.DoesNotContain("#endif", program);
+    }
+
+    [Fact]
+    public async Task RateLimitingIncludesRegistrationInProgram()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorRateProg", "--IncludeRateLimiting true");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorRateProg", "Program.cs"));
+        Assert.Contains("AddRateLimiter", program);
+        Assert.Contains("UseRateLimiter", program);
+        Assert.DoesNotContain("#if", program);
+        Assert.DoesNotContain("#endif", program);
+    }
+
+    [Fact]
+    public async Task DefaultExcludesHealthAndRateLimitingFromProgram()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorDefProg");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorDefProg", "Program.cs"));
+        Assert.DoesNotContain("AddQuilt4NetHealth", program);
+        Assert.DoesNotContain("UseQuilt4NetHealth", program);
+        Assert.DoesNotContain("AddRateLimiter", program);
+        Assert.DoesNotContain("UseRateLimiter", program);
+    }
 }

@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="Tharga.Blazor" Version="2.0.0-pre.4" />
+    <!--#if (IncludeHealth) -->
+    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.3" />
+    <!--#endif -->
     <ProjectReference Include="..\Tharga.Blazor1.Client\Tharga.Blazor1.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.2" />
   </ItemGroup>

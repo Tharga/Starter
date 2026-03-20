@@ -17,6 +17,18 @@
       "datatype": "bool",
       "defaultValue": "true",
       "description": "Include sample pages (Counter, Weather)"
+    },
+    "IncludeHealth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include Quilt4Net health endpoints"
+    },
+    "IncludeRateLimiting": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include rate limiting middleware"
     }
   },
   "guids": [],
@@ -48,6 +60,12 @@
           "exclude": [
             "Tharga.Blazor1.Client/Pages/Counter.razor",
             "Tharga.Blazor1/Components/Pages/Weather.razor"
+          ]
+        },
+        {
+          "condition": "(!IncludeHealth || !IncludeSamples)",
+          "exclude": [
+            "Tharga.Blazor1/Framework/ComponentService.cs"
           ]
         }
       ]
