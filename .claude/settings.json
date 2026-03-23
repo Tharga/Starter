@@ -11,7 +11,8 @@
       "Bash(cp .claude/feature.md .claude/features-done/blazor-ui-foundation.md)",
       "Bash(rm .claude/feature.md .claude/plan.md)",
       "Read(//c/dev/**)",
-      "Bash(find /c/dev -type f -name *.cs -path *Health*)"
+      "Bash(find /c/dev -type f -name *.cs -path *Health*)",
+      "Bash(echo \"exit: $?\")"
     ],
     "deny": [],
     "additionalDirectories": [
