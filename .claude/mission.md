@@ -41,6 +41,9 @@ The templates integrate packages from the Tharga ecosystem:
 
 This project replaces the previous monolithic "Tharga Packages — Implementation Guide". Instead of one document describing all packages, each Tharga package project now owns its own integration instructions. The templates in this repo tie everything together — a user starts from a template and follows per-package guides to add features incrementally.
 
+## Documentation Requests
+- **Rate limiting configuration guide** — Add documentation for configuring rate limiting using the built-in ASP.NET Core `Microsoft.AspNetCore.RateLimiting` middleware. Should cover: default values, how to customize PermitLimit/Window, available rate limiter types (FixedWindow, SlidingWindow, TokenBucket), and how to apply `[EnableRateLimiting("api")]` to controllers. This was previously tracked in the Platform project but rate limiting is standard .NET, not a Tharga package feature. Requested by: Tharga.Platform.
+
 ## Guiding principles
 
 - Each Tharga package project owns its own integration docs; templates reference them rather than duplicating
