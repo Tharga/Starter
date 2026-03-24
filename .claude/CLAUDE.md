@@ -19,6 +19,13 @@ After completing each step in the plan:
 ### Ending a session
 - Update `.claude/plan.md` with the current status of all steps
 - Add a "Last session" note summarizing what was completed and what comes next
+- Note any README.md changes that will be needed when the feature is complete
+
+## Testing Rules
+- Run relevant tests after completing each step before marking it done
+- If tests fail, fix the issue before moving on — do not proceed with a failing test
+- Run the full test suite before any git commit
+- If no tests exist for the code being changed, write them first before implementing
 
 ## Build & Test
 ```bash
@@ -26,31 +33,34 @@ dotnet build -c Release
 dotnet test -c Release
 ```
 
-## Template Guidelines
-- Each template must have a valid `.template.config/template.json`
-- Use `tharga-` prefix for all template shortNames (e.g. `tharga-blazor`, `tharga-console`)
-- Test templates by installing locally: `dotnet new install ./templates/<name>`
-- After changes, verify with: `dotnet new <shortName> -n TestProject && dotnet build TestProject`
-
 ## Coding Guidelines
-- Keep an empty line between constructor and functions
-- Use `init` over `set` wherever possible
+- Write tests for every new function
+- Extract shared or repeated strings into named constants
+- Suggest bumping of minor version when compatibility is broken
 - Prefer functional programming patterns
+- Prefer the command pattern for operations and side effects
+- Use `init` over `set` wherever possible
 
 ### Feature and framework organization
 - Place feature-specific code under `features/[name]`
 - Place shared cross-functional code under `framework/[name]`
+- Use `framework/` only for code that is reused across multiple features
+- If code primarily belongs to one feature, keep it under that feature even if it has some reuse potential
+- When in doubt, prefer `features/[name]` over `framework/[name]`
+- Do not introduce shared abstractions in `framework/` prematurely; promote code there only when cross-feature reuse is clear
 
 ## Workflow Rules
 - Before making changes, explain what you plan to do
 - After completing a task, summarize what was changed
 - If unsure about something, ask before proceeding
+- **Cross-project guard:** If an instruction or change targets a different project than the one currently open, ask the user for confirmation before proceeding. Do not silently apply changes to other projects.
 
 ## Git Rules
 - Never push to remote without explicit approval from me
 - Never force push under any circumstances
 - Create branch `feature/<feature-name>` at the start of each feature
-- Commit at logical milestones
+- Commit at logical milestones (e.g. a component is complete and tested)
+- Never commit failing tests
 - Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`
 - Never merge to main — leave that for me to review and merge
 
@@ -80,8 +90,44 @@ When all planned steps are done:
 ### Closing a feature (only when the user says it is done)
 - All acceptance criteria in `.claude/feature.md` are met
 - All tests pass
+- README.md has been updated to reflect the new feature
 - `.claude/feature.md` is archived to `.claude/features-done/<feature-name>.md` and both `.claude/feature.md` and `.claude/plan.md` should be deleted
 - Remove the corresponding file from `.claude/features-planned/` if one exists
-- The feature closure (archive, cleanup) must be its own dedicated commit with message: `feat: <feature-name> complete`
-- Do not combine the closure commit with other code changes — it should only contain the feature file archival and cleanup
+- A final commit is made with message: `feat: <feature-name> complete`
 - Merge to originating branch and delete feature branch only when the user explicitly asks
+
+## Feature Requests (cross-project)
+
+Projects can request features from each other via `.claude/requests.md`.
+
+- Read `~/.claude/projects.md` (or `$OBSIDIAN_VAULT/Tharga/projects.md`) to discover other projects
+- Read `.claude/requests.md` on startup — show pending requests and new notifications to the user
+- Writing feature requests to other projects is **exempt from the cross-project guard**
+- For mono-repos: requests go to the root, not sub-projects (see projects.md for details)
+- Never mark a request as done without user confirmation
+- When a request is completed: update status to Done and write a notification back to the requester's `.claude/requests.md`
+
+### Request format
+```markdown
+## Pending
+
+### <short description>
+- **From:** <project name> (`<project path>`)
+- **Date:** <YYYY-MM-DD>
+- **Priority:** <High/Medium/Low>
+- **Description:** <what is needed and why>
+- **Status:** Pending
+
+## Notifications
+
+### <short description> — DONE
+- **From:** <project name> (`<project path>`)
+- **Completed:** <YYYY-MM-DD>
+- **Summary:** <what was done>
+- **Branch/Version:** <branch or version>
+```
+
+## Backlog Hygiene
+- When a task from the backlog (in `mission.md` or linked external files) is completed, mark it as done or remove it
+- When fixing a bug listed in the backlog, remove the bug entry after the fix is verified
+- Keep the backlog current — do not leave completed items lingering
