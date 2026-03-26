@@ -1,14 +1,15 @@
-@inject ITeamStateService TeamStateService
+@inject ILocalStorageService LocalStorageService
+@inject IHttpContextAccessor HttpContextAccessor
 
 <RadzenHeader>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Stretch" JustifyContent="JustifyContent.SpaceBetween" Gap="0">
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-            <RadzenSidebarToggle Click="@(() => _menuExpanded = !_menuExpanded)" />
+            <RadzenSidebarToggle Click="@ToggleMenuExpanded" />
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                 <BreadCrumbs ShowRoot="true" />
             </RadzenStack>
         </RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Style="padding-right: 1rem;">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
             <TeamSelector />
             <LoginDisplay />
         </RadzenStack>
@@ -22,42 +23,54 @@
         <RadzenPanelMenuItem Text="Counter" Icon="exposure_plus_1" Path="/counter" />
         <RadzenPanelMenuItem Text="Weather" Icon="weather_mix" Path="/weather" />
 //-#endif
-        <AuthorizeView>
-            <Authorized Context="authContext">
-                @if (_hasTeam)
+
+        <AuthorizeView Roles="@Roles.TeamMember">
+            <Authorized Context="teamContext">
+                @if (_canManageApiKeys)
                 {
-                    <RadzenPanelMenuItem Text="API Keys" Icon="vpn_key" Path="/api-keys" />
-                    <RadzenPanelMenuItem Text="Audit Log" Icon="history" Path="/audit" />
+                    <RadzenPanelMenuItem Text="Api" Icon="api">
+                        <RadzenPanelMenuItem Text="API Keys" Icon="vpn_key" Path="/api-keys" />
+                        <RadzenPanelMenuItem Text="Swagger" Icon="api" Path="/swagger" Target="WebApi" />
+                    </RadzenPanelMenuItem>
                 }
-                <AuthorizeView Roles="@Roles.Developer" Context="devContext">
-                    <Authorized Context="devAuthContext">
-                        <RadzenPanelMenuItem Text="Development" Icon="code" Expanded="false">
-                            <RadzenPanelMenuItem Text="Users" Icon="people" Path="/users" />
-                        </RadzenPanelMenuItem>
-                    </Authorized>
-                </AuthorizeView>
+                @if (_canViewAudit)
+                {
+                    <RadzenPanelMenuItem Text="Audit" Icon="history" Path="/audit" />
+                }
             </Authorized>
         </AuthorizeView>
+
+        <AuthorizeView Roles="@Roles.Developer">
+            <Authorized Context="devContext">
+                <RadzenPanelMenuItem Text="Developer" Icon="logo_dev">
+                    <RadzenPanelMenuItem Text="Users" Icon="people" Path="/users" />
+                </RadzenPanelMenuItem>
+            </Authorized>
+        </AuthorizeView>
+
         <RadzenPanelMenuItem Text="About" Icon="info" Path="/about" />
     </RadzenPanelMenu>
 </RadzenSidebar>
 
 @code {
     bool _menuExpanded = true;
-    bool _hasTeam;
+    bool _canViewAudit;
+    bool _canManageApiKeys;
 
     protected override async Task OnInitializedAsync()
     {
-        _hasTeam = await TeamStateService.GetSelectedTeamAsync() != null;
-        TeamStateService.SelectedTeamChangedEvent += OnSelectedTeamChanged;
+        _menuExpanded = await LocalStorageService.GetItemAsync<bool?>("MenuExpanded") ?? true;
+
+        var user = HttpContextAccessor.HttpContext?.User;
+        _canViewAudit = user?.HasClaim(TeamClaimTypes.Scope, TeamScopes.Manage) == true;
+        _canManageApiKeys = user?.HasClaim(TeamClaimTypes.Scope, ApiKeyScopes.Manage) == true;
+
+        await base.OnInitializedAsync();
     }
 
-    void OnSelectedTeamChanged(object sender, SelectedTeamChangedEventArgs e)
+    private async Task ToggleMenuExpanded(EventArgs arg)
     {
-        InvokeAsync(async () =>
-        {
-            _hasTeam = await TeamStateService.GetSelectedTeamAsync() != null;
-            StateHasChanged();
-        });
+        _menuExpanded = !_menuExpanded;
+        await LocalStorageService.SetItemAsync<bool?>("MenuExpanded", _menuExpanded);
     }
 }

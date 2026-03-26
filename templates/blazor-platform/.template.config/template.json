@@ -21,13 +21,13 @@
     "IncludeHealth": {
       "type": "parameter",
       "datatype": "bool",
-      "defaultValue": "false",
+      "defaultValue": "true",
       "description": "Include Quilt4Net health endpoints"
     },
     "IncludeRateLimiting": {
       "type": "parameter",
       "datatype": "bool",
-      "defaultValue": "false",
+      "defaultValue": "true",
       "description": "Include rate limiting middleware"
     },
     "httpPort": {
