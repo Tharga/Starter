@@ -123,13 +123,16 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseRateLimiter();
 #endif
 
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
+
 // Auth & Controllers middleware
 app.UseThargaAuth();
 app.UseThargaControllers();
 
-app.UseAntiforgery();
 #if (IncludeHealth)
-app.UseRouting();
 app.UseQuilt4NetHealth();
 #endif
 
