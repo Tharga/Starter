@@ -3,7 +3,6 @@ using Tharga.Blazor1.Components;
 using Tharga.Blazor1.Features.Team;
 using Tharga.Blazor1.Framework;
 using Radzen;
-using Tharga.Blazor.Framework;
 using Tharga.MongoDB;
 using Tharga.Team;
 using Tharga.Team.Blazor.Features.Authentication;
@@ -18,134 +17,128 @@ using Quilt4Net.Toolkit.Health;
 using System.Threading.RateLimiting;
 #endif
 
-namespace Tharga.Blazor1;
+var builder = WebApplication.CreateBuilder(args);
 
-public class Program
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
+
+// Step 1: UI Foundation
+builder.Services.AddRadzenComponents();
+builder.Services.AddRadzenCookieThemeService(options =>
 {
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+    options.Name = Constants.ThemeStorageName;
+    options.Duration = TimeSpan.FromDays(365);
+});
 
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents()
-            .AddInteractiveWebAssemblyComponents();
+// Step 2: Authentication
+builder.AddThargaAuth();
 
-        // Step 1: UI Foundation
-        builder.Services.AddRadzenComponents();
-        builder.Services.AddRadzenCookieThemeService(options =>
-        {
-            options.Name = Constants.ThemeStorageName;
-            options.Duration = TimeSpan.FromDays(365);
-        });
+// Step 3: API Controllers & Swagger
+builder.Services.AddThargaControllers();
 
-        // Step 2: Authentication
-        builder.AddThargaAuth();
+// Step 4: Team Management
+builder.Services.AddThargaTeamBlazor(o =>
+{
+    o.Title = "Tharga.Blazor1";
+    o.SkipAuthStateDecoration = true;
+    o.RegisterTeamService<AppTeamService, AppUserService>();
+    o.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
+    o.ShowMemberRoles = true;
+    o.ShowScopeOverrides = true;
+});
+builder.Services.AddTransient<IClaimsTransformation, TeamCookieClaimsTransformation>();
+builder.Services.AddThargaTeamRepository(o =>
+{
+    o.RegisterUserRepository<UserEntity>();
+    o.RegisterTeamRepository<TeamEntity, TeamMember>();
+});
 
-        // Step 3: API Controllers & Swagger
-        builder.Services.AddThargaControllers();
+// MongoDB
+builder.AddMongoDB();
 
-        // Step 4: Team Management
-        builder.Services.AddThargaTeamBlazor(o =>
-        {
-            o.Title = "Tharga.Blazor1";
-            o.SkipAuthStateDecoration = true;
-            o.RegisterTeamService<AppTeamService, AppUserService>();
-            o.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
-            o.ShowMemberRoles = true;
-            o.ShowScopeOverrides = true;
-        });
-        builder.Services.AddTransient<IClaimsTransformation, TeamCookieClaimsTransformation>();
-        builder.Services.AddThargaTeamRepository(o =>
-        {
-            o.RegisterUserRepository<UserEntity>();
-            o.RegisterTeamRepository<TeamEntity, TeamMember>();
-        });
+// Step 5: API Key Authentication
+builder.Services.AddThargaApiKeys();
+builder.Services.AddAuthentication()
+    .AddThargaApiKeyAuthentication();
 
-        // MongoDB
-        builder.AddMongoDB();
+// Step 6: Scopes
+builder.Services.AddThargaScopes(scopes =>
+{
+    // Register application-specific scopes here:
+    // scopes.Register("feature:read", AccessLevel.Viewer);
+    // scopes.Register("feature:write", AccessLevel.User);
+});
 
-        // Step 5: API Key Authentication
-        builder.Services.AddThargaApiKeys();
-        builder.Services.AddAuthentication()
-            .AddThargaApiKeyAuthentication();
+// Step 7: Tenant Roles
+builder.Services.AddThargaTenantRoles(roles =>
+{
+    // Register application-specific roles here:
+    // roles.Register("Editor", new[] { "feature:read", "feature:write" });
+});
 
-        // Step 6: Scopes
-        builder.Services.AddThargaScopes(scopes =>
-        {
-            // Register application-specific scopes here:
-            // scopes.Register("feature:read", AccessLevel.Viewer);
-            // scopes.Register("feature:write", AccessLevel.User);
-        });
-
-        // Step 7: Tenant Roles
-        builder.Services.AddThargaTenantRoles(roles =>
-        {
-            // Register application-specific roles here:
-            // roles.Register("Editor", new[] { "feature:read", "feature:write" });
-        });
-
-        // Step 8: Audit Logging
-        builder.Services.AddThargaAuditLogging();
+// Step 8: Audit Logging
+builder.Services.AddThargaAuditLogging();
 
 #if (IncludeHealth)
-        builder.AddQuilt4NetHealth(o =>
-        {
+builder.AddQuilt4NetHealth(o =>
+{
 #if (IncludeSamples)
-            // Sample component service — see https://github.com/Quilt4/Quilt4Net.Toolkit for documentation.
-            o.AddComponentService<ComponentService>();
+    // Sample component service — see https://github.com/Quilt4/Quilt4Net.Toolkit for documentation.
+    o.AddComponentService<ComponentService>();
 #endif
-        });
+});
 #endif
 #if (IncludeRateLimiting)
-        // Rate limiting: 100 requests per minute per IP address.
-        // Adjust PermitLimit and Window to match your traffic requirements.
-        // See https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit for options.
-        builder.Services.AddRateLimiter(options =>
-        {
-            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 100,
-                        Window = TimeSpan.FromMinutes(1)
-                    }));
-            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-        });
+// Rate limiting: 100 requests per minute per IP address.
+// Adjust PermitLimit and Window to match your traffic requirements.
+// See https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit for options.
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 #endif
 
-        var app = builder.Build();
+var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseWebAssemblyDebugging();
-        }
-        else
-        {
-            app.UseExceptionHandler("/Error");
-        }
-
-        app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-#if (IncludeRateLimiting)
-        app.UseRateLimiter();
-#endif
-
-        // Auth & Controllers middleware
-        app.UseThargaAuth();
-        app.UseThargaControllers();
-
-        app.UseAntiforgery();
-#if (IncludeHealth)
-        app.UseRouting();
-        app.UseQuilt4NetHealth();
-#endif
-
-        app.MapStaticAssets();
-        app.MapRazorComponents<App>()
-            .AddInteractiveServerRenderMode()
-            .AddInteractiveWebAssemblyRenderMode()
-            .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
-
-        app.Run();
-    }
+if (app.Environment.IsDevelopment())
+{
+    app.UseWebAssemblyDebugging();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+}
+
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+#if (IncludeRateLimiting)
+app.UseRateLimiter();
+#endif
+
+// Auth & Controllers middleware
+app.UseThargaAuth();
+app.UseThargaControllers();
+
+app.UseAntiforgery();
+#if (IncludeHealth)
+app.UseRouting();
+app.UseQuilt4NetHealth();
+#endif
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(Tharga.Blazor1.Client._Imports).Assembly);
+
+app.Run();
+
+public partial class Program;
