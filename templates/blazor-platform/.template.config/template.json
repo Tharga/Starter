@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Tharga",
+  "classifications": ["Web", "Blazor", "Tharga", "Platform"],
+  "identity": "Tharga.Blazor.Platform",
+  "name": "Tharga Blazor Platform App",
+  "shortName": "tharga-blazor-platform",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "sourceName": "Tharga.Blazor1",
+  "preferNameDirectory": true,
+  "symbols": {
+    "IncludeSamples": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include sample pages (Counter, Weather)"
+    },
+    "IncludeHealth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include Quilt4Net health endpoints"
+    },
+    "IncludeRateLimiting": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include rate limiting middleware"
+    }
+  },
+  "guids": [],
+  "specialCustomOperations": {
+    "**/*.razor": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "style": "line",
+            "token": "//-"
+          }
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/.vs/**"
+          ]
+        },
+        {
+          "condition": "(!IncludeSamples)",
+          "exclude": [
+            "Tharga.Blazor1.Client/Pages/Counter.razor",
+            "Tharga.Blazor1/Components/Pages/Weather.razor"
+          ]
+        },
+        {
+          "condition": "(!IncludeHealth || !IncludeSamples)",
+          "exclude": [
+            "Tharga.Blazor1/Framework/ComponentService.cs"
+          ]
+        }
+      ]
+    }
+  ]
+}

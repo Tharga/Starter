@@ -1,0 +1,5 @@
+@page "/audit"
+@using Tharga.Team.Blazor.Features.Audit
+@attribute [Authorize(Roles = Roles.Developer)]
+
+<AuditLogView />
