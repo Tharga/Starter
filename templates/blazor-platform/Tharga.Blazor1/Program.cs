@@ -73,6 +73,7 @@ builder.Services.AddThargaScopes(scopes =>
 // Step 7: Tenant Roles
 builder.Services.AddThargaTenantRoles(roles =>
 {
+    roles.Register("TeamDeveloper", new[] { ApiKeyScopes.Manage });
     // Register application-specific roles here:
     // roles.Register("Editor", new[] { "feature:read", "feature:write" });
 });
