@@ -14,11 +14,13 @@ public class AppTeamService(
     {
         return Task.FromResult(new TeamEntity
         {
+            Id = ObjectId.GenerateNewId(),
             Key = teamKey,
             Name = name,
             Members = [new TeamMember
             {
                 Key = user.Key,
+                LastSeen = DateTime.UtcNow,
                 AccessLevel = AccessLevel.Owner,
                 State = MembershipState.Member
             }]
@@ -29,7 +31,14 @@ public class AppTeamService(
     {
         return Task.FromResult(new TeamMember
         {
-            Key = model.Email,
+            Key = null, //NOTE: This value will be assigned on registration.
+            Name = model.Name,
+            Invitation = new Invitation
+            {
+                EMail = model.Email,
+                InviteKey = Guid.NewGuid().ToString(),
+                InviteTime = DateTime.UtcNow
+            },
             AccessLevel = model.AccessLevel,
             State = MembershipState.Invited
         });

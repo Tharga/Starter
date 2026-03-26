@@ -45,7 +45,7 @@ builder.Services.AddThargaTeamBlazor(o =>
     o.RegisterTeamService<AppTeamService, AppUserService, TeamMember>();
     o.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
     o.ShowMemberRoles = true;
-    o.ShowScopeOverrides = true;
+    o.ShowScopeOverrides = false;
 });
 builder.Services.AddTransient<IClaimsTransformation, TeamCookieClaimsTransformation>();
 builder.Services.AddThargaTeamRepository(o =>
