@@ -1,0 +1,14 @@
+@page "/developer/log"
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<Quilt4Net.Toolkit.Blazor.Features.Log.LogView />
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,16 @@
+@page "/developer/audit"
+@using Tharga.Team.Blazor.Features.Audit
+@attribute [Authorize(Roles = Roles.Developer)]
+@rendermode InteractiveServer
+@inject BreadCrumbService BreadCrumbService
+
+<AuditLogView />
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}

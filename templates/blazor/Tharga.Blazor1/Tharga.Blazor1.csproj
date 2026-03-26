@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
   </ItemGroup>
 
+  <Target Name="RemoveClientRuntimeConfig" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)Tharga.Blazor1.Client.runtimeconfig.json" />
+  </Target>
+
 </Project>
