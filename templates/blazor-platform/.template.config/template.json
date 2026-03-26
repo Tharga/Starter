@@ -29,6 +29,24 @@
       "datatype": "bool",
       "defaultValue": "false",
       "description": "Include rate limiting middleware"
+    },
+    "httpPort": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 5000,
+        "high": 5300
+      },
+      "replaces": "httpPort"
+    },
+    "httpsPort": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "low": 7000,
+        "high": 7300
+      },
+      "replaces": "httpsPort"
     }
   },
   "guids": [],

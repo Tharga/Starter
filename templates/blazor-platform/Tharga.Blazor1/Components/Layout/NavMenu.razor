@@ -1,3 +1,5 @@
+@inject ITeamStateService TeamStateService
+
 <RadzenHeader>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Stretch" JustifyContent="JustifyContent.SpaceBetween" Gap="0">
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
@@ -22,12 +24,16 @@
 //-#endif
         <AuthorizeView>
             <Authorized Context="authContext">
-                <RadzenPanelMenuItem Text="Teams" Icon="groups" Path="/teams" />
-                <RadzenPanelMenuItem Text="API Keys" Icon="vpn_key" Path="/api-keys" />
+                @if (_hasTeam)
+                {
+                    <RadzenPanelMenuItem Text="API Keys" Icon="vpn_key" Path="/api-keys" />
+                    <RadzenPanelMenuItem Text="Audit Log" Icon="history" Path="/audit" />
+                }
                 <AuthorizeView Roles="@Roles.Developer" Context="devContext">
                     <Authorized Context="devAuthContext">
-                        <RadzenPanelMenuItem Text="Users" Icon="people" Path="/users" />
-                        <RadzenPanelMenuItem Text="Audit Log" Icon="history" Path="/audit" />
+                        <RadzenPanelMenuItem Text="Development" Icon="code" Expanded="false">
+                            <RadzenPanelMenuItem Text="Users" Icon="people" Path="/users" />
+                        </RadzenPanelMenuItem>
                     </Authorized>
                 </AuthorizeView>
             </Authorized>
@@ -38,4 +44,20 @@
 
 @code {
     bool _menuExpanded = true;
+    bool _hasTeam;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hasTeam = await TeamStateService.GetSelectedTeamAsync() != null;
+        TeamStateService.SelectedTeamChangedEvent += OnSelectedTeamChanged;
+    }
+
+    void OnSelectedTeamChanged(object sender, SelectedTeamChangedEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            _hasTeam = await TeamStateService.GetSelectedTeamAsync() != null;
+            StateHasChanged();
+        });
+    }
 }

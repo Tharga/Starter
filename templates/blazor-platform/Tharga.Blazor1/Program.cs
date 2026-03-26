@@ -42,7 +42,7 @@ builder.Services.AddThargaTeamBlazor(o =>
 {
     o.Title = "Tharga.Blazor1";
     o.SkipAuthStateDecoration = true;
-    o.RegisterTeamService<AppTeamService, AppUserService>();
+    o.RegisterTeamService<AppTeamService, AppUserService, TeamMember>();
     o.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
     o.ShowMemberRoles = true;
     o.ShowScopeOverrides = true;
