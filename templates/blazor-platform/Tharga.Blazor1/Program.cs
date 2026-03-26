@@ -80,6 +80,14 @@ builder.Services.AddThargaTenantRoles(roles =>
 // Step 8: Audit Logging
 builder.Services.AddThargaAuditLogging();
 
+#if (IncludeQuilt4Net)
+// Quilt4Net: API logging, remote configuration, and content management.
+// See https://github.com/Quilt4/Quilt4Net.Toolkit for documentation.
+builder.AddQuilt4NetApiLogging();
+builder.AddQuilt4NetRemoteConfiguration();
+builder.AddQuilt4NetBlazorContent();
+#endif
+
 #if (IncludeHealth)
 builder.AddQuilt4NetHealth(o =>
 {

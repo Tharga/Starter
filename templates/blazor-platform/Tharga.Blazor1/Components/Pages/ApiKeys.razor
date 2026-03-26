@@ -1,5 +1,5 @@
 @page "/api-keys"
 @using Tharga.Team.Blazor.Features.Api
-@attribute [Authorize]
+@attribute [Authorize(Roles = Roles.TeamMember)]
 
 <ApiKeyView />

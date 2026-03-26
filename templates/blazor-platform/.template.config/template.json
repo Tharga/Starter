@@ -30,6 +30,12 @@
       "defaultValue": "true",
       "description": "Include rate limiting middleware"
     },
+    "IncludeQuilt4Net": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include Quilt4Net logging, remote configuration, and content"
+    },
     "httpPort": {
       "type": "generated",
       "generator": "port",
@@ -84,6 +90,14 @@
           "condition": "(!IncludeHealth || !IncludeSamples)",
           "exclude": [
             "Tharga.Blazor1/Framework/ComponentService.cs"
+          ]
+        },
+        {
+          "condition": "(!IncludeQuilt4Net)",
+          "exclude": [
+            "Tharga.Blazor1/Components/Developer/Log.razor",
+            "Tharga.Blazor1/Components/Developer/Content.razor",
+            "Tharga.Blazor1/Components/Developer/Configuration.razor"
           ]
         }
       ]

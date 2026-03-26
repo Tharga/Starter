@@ -1,5 +1,49 @@
 @page "/audit"
 @using Tharga.Team.Blazor.Features.Audit
-@attribute [Authorize(Roles = Roles.Developer)]
+@using Tharga.Team.Service.Audit
+@using Tharga.Blazor1.Features.Audit
+@attribute [Authorize(Roles = Roles.TeamMember)]
+@inject ITeamStateService TeamStateService
+@inject IHttpContextAccessor HttpContextAccessor
+@rendermode InteractiveServer
 
-<AuditLogView />
+@if (_selectedTeam == null)
+{
+    <RadzenText>No team selected.</RadzenText>
+}
+else if (!_hasAccess)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" ShowIcon="true" Variant="Variant.Flat">
+        You do not have access to the audit log.
+    </RadzenAlert>
+}
+else
+{
+    <AuditLogView TeamKey="@_selectedTeam.Key" RestrictCallerType="@_restrictCallerType" />
+}
+
+@code {
+    private ITeam _selectedTeam;
+    private bool _hasAccess;
+    private AuditCallerType? _restrictCallerType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedTeam = await TeamStateService.GetSelectedTeamAsync();
+        if (_selectedTeam == null) return;
+
+        var user = HttpContextAccessor.HttpContext?.User;
+        var hasAuditRead = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.Read) ?? false;
+        var hasApiKeyUsage = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.ApiKeyUsage) ?? false;
+
+        if (hasAuditRead)
+        {
+            _hasAccess = true;
+        }
+        else if (hasApiKeyUsage)
+        {
+            _hasAccess = true;
+            _restrictCallerType = AuditCallerType.ApiKey;
+        }
+    }
+}

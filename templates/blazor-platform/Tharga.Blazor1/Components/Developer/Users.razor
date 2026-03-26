@@ -1,0 +1,16 @@
+@page "/developer/user"
+@using Tharga.Team.Blazor.Features.User
+@using Tharga.Blazor1.Features.Team
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<UsersView TMember="TeamMember" />
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}
