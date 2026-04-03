@@ -57,3 +57,7 @@ This project replaces the previous monolithic "Tharga Packages — Implementatio
 - Templates should always use the latest stable versions of Tharga packages
 - Keep templates minimal — only include what the template stage promises
 - One NuGet template pack (`Tharga.Starter`) publishes all templates
+
+## External References
+- **Plan directory**: `$DOC_ROOT/Tharga/plans/Starter`
+- **Incoming requests**: `c:\Users\danie\SynologyDrive\Documents\Notes\Tharga\Requests.md` — check for pending requests for this project on startup

@@ -5,6 +5,14 @@
   },
   "permissions": {
     "allow": [
+      "Bash(dotnet package:*)",
+      "Bash(dotnet build:*)",
+      "Bash(xargs grep:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(dotnet list:*)",
+      "Bash(done)",
+      "Bash(nuget list:*)",
       "Bash(dotnet new:*)",
       "Bash(dotnet test:*)",
       "Bash(cp .claude/feature.md .claude/features-done/blazor-ui-foundation.md)",
