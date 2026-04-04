@@ -12,6 +12,11 @@ using Tharga.Team.Service.Audit;
 #if (IncludeHealth)
 using Quilt4Net.Toolkit.Health;
 #endif
+#if (IncludeQuilt4Net)
+using Quilt4Net.Toolkit;
+using Quilt4Net.Toolkit.Api;
+using Quilt4Net.Toolkit.Blazor;
+#endif
 #if (IncludeRateLimiting)
 using System.Threading.RateLimiting;
 #endif
