@@ -15,6 +15,7 @@
     <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.7" />
     <!--#endif -->
     <!--#if (IncludeQuilt4Net) -->
+    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.8" />
     <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.7" />
     <!--#endif -->
     <ProjectReference Include="..\Tharga.Blazor1.Client\Tharga.Blazor1.Client.csproj" />
