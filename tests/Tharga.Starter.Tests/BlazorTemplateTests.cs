@@ -167,11 +167,11 @@ public class BlazorTemplateTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DefaultExcludesHealthPackageReference()
+    public async Task DefaultIncludesHealthPackageReference()
     {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoHealth");
-        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNoHealth", "BlazorNoHealth.csproj"));
-        Assert.DoesNotContain("Quilt4Net.Toolkit.Health", csproj);
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorDefHealth");
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorDefHealth", "BlazorDefHealth.csproj"));
+        Assert.Contains("Quilt4Net.Toolkit.Health", csproj);
     }
 
     [Fact]

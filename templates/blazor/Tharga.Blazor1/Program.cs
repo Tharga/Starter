@@ -69,9 +69,9 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 #if (IncludeRateLimiting)
 app.UseRateLimiter();
 #endif
+app.UseRouting();
 app.UseAntiforgery();
 #if (IncludeHealth)
-app.UseRouting();
 app.UseQuilt4NetHealth();
 #endif
 
