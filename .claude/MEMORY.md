@@ -1,0 +1,2 @@
+- [Feature closing workflow](memory/feedback_feature_closing.md) — merge to develop with --no-ff, user handles origin
+- [Minimize permission prompts](memory/feedback_minimize_prompts.md) — use broad wildcards in settings.json

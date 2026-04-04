@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Tharga.Blazor1.Components;
 using Tharga.Blazor1.Features.Team;
 using Tharga.Blazor1.Framework;
@@ -9,7 +8,6 @@ using Tharga.Team.Blazor.Features.Authentication;
 using Tharga.Team.Blazor.Framework;
 using Tharga.Team.MongoDB;
 using Tharga.Team.Service;
-using Tharga.Communication;
 using Tharga.Team.Service.Audit;
 #if (IncludeHealth)
 using Quilt4Net.Toolkit.Health;
@@ -48,7 +46,6 @@ builder.Services.AddThargaTeamBlazor(o =>
     o.ShowMemberRoles = true;
     o.ShowScopeOverrides = false;
 });
-builder.Services.AddTransient<IClaimsTransformation, TeamCookieClaimsTransformation>();
 builder.Services.AddThargaTeamRepository(o =>
 {
     o.RegisterUserRepository<UserEntity>();
@@ -57,9 +54,6 @@ builder.Services.AddThargaTeamRepository(o =>
 
 // MongoDB
 builder.AddMongoDB();
-
-//TODO: Remove when Tharga.Communication no longer auto-registers SubscriptionStateChangedHandler without AddThargaCommunicationClient(). See Tharga/Requests.md.
-builder.AddThargaCommunicationClient();
 
 // Step 5: API Key Authentication
 builder.Services.AddThargaApiKeys();

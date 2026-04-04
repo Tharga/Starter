@@ -11,7 +11,7 @@ public class AppTeamService(
     IMongoDbServiceFactory mongoDbServiceFactory)
     : TeamServiceRepositoryBase<TeamEntity, TeamMember>(userService, teamRepository, mongoDbServiceFactory)
 {
-    protected override Task<TeamEntity> CreateTeam(string teamKey, string name, IUser user)
+    protected override Task<TeamEntity> CreateTeam(string teamKey, string name, IUser user, string displayName)
     {
         return Task.FromResult(new TeamEntity
         {
