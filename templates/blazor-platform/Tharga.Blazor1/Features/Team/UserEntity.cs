@@ -8,4 +8,5 @@ public record UserEntity : EntityBase, IUser
     public string Key { get; init; } = "";
     public string Identity { get; init; } = "";
     public string EMail { get; init; } = "";
+    public string Name { get; init; }
 }

@@ -12,12 +12,14 @@ public class AppUserService(
     protected override Task<UserEntity> CreateUserEntityAsync(ClaimsPrincipal claimsPrincipal, string identity)
     {
         var email = claimsPrincipal.FindFirstValue(ClaimTypes.Email) ?? "";
+        var name = claimsPrincipal.FindFirstValue(ClaimTypes.Name);
 
         return Task.FromResult(new UserEntity
         {
             Key = identity,
             Identity = identity,
-            EMail = email
+            EMail = email,
+            Name = name
         });
     }
 }

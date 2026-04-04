@@ -81,11 +81,14 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformPages");
         var pagesDir = Path.Combine(projectPath, "PlatformPages", "Components", "Pages");
+        var devDir = Path.Combine(projectPath, "PlatformPages", "Components", "Developer");
         Assert.True(File.Exists(Path.Combine(pagesDir, "Profile.razor")), "Profile page should exist");
         Assert.True(File.Exists(Path.Combine(pagesDir, "Teams.razor")), "Teams page should exist");
-        Assert.True(File.Exists(Path.Combine(pagesDir, "Users.razor")), "Users page should exist");
         Assert.True(File.Exists(Path.Combine(pagesDir, "ApiKeys.razor")), "ApiKeys page should exist");
         Assert.True(File.Exists(Path.Combine(pagesDir, "Audit.razor")), "Audit page should exist");
+        Assert.True(File.Exists(Path.Combine(devDir, "Users.razor")), "Developer Users page should exist");
+        Assert.True(File.Exists(Path.Combine(devDir, "Database.razor")), "Developer Database page should exist");
+        Assert.True(File.Exists(Path.Combine(devDir, "DeveloperAudit.razor")), "Developer Audit page should exist");
     }
 
     [Fact]
