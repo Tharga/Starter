@@ -1,4 +1,5 @@
 using Tharga.Blazor1.Components;
+using Tharga.Blazor1.Features.Audit;
 using Tharga.Blazor1.Features.Team;
 using Tharga.Blazor1.Framework;
 using Radzen;
@@ -68,6 +69,8 @@ builder.Services.AddAuthentication()
 // Step 6: Scopes
 builder.Services.AddThargaScopes(scopes =>
 {
+    scopes.Register(AuditScopes.Read, AccessLevel.User);
+    scopes.Register(AuditScopes.ApiKeyUsage, AccessLevel.User);
     // Register application-specific scopes here:
     // scopes.Register("feature:read", AccessLevel.Viewer);
     // scopes.Register("feature:write", AccessLevel.User);

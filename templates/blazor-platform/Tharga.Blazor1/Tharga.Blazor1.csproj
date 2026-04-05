@@ -7,16 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Tharga.Team.Blazor" Version="2.0.3" />
-    <PackageReference Include="Tharga.Team.Service" Version="2.0.3" />
-    <PackageReference Include="Tharga.Team.MongoDB" Version="2.0.3" />
+    <PackageReference Include="Tharga.Team.Blazor" Version="2.0.5" />
+    <PackageReference Include="Tharga.Team.Service" Version="2.0.5" />
+    <PackageReference Include="Tharga.Team.MongoDB" Version="2.0.6" />
+    <PackageReference Include="Tharga.Toolkit.Standard" Version="1.15.20" />
     <PackageReference Include="Tharga.MongoDB.Blazor" Version="2.10.0" />
     <!--#if (IncludeHealth) -->
-    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.7" />
+    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.9" />
     <!--#endif -->
     <!--#if (IncludeQuilt4Net) -->
-    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.8" />
-    <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.7" />
+    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.9" />
+    <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.9" />
     <!--#endif -->
     <ProjectReference Include="..\Tharga.Blazor1.Client\Tharga.Blazor1.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />

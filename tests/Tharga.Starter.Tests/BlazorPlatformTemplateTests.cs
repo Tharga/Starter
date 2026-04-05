@@ -2,6 +2,7 @@ using Xunit;
 
 namespace Tharga.Starter.Tests;
 
+[Collection("Template")]
 public class BlazorPlatformTemplateTests : IAsyncLifetime
 {
     private readonly string _templatePath = Path.Combine(TemplateTestHelper.TemplatesRoot, "blazor-platform");
@@ -155,5 +156,58 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
         Assert.Contains("TeamSelector", navMenu);
         Assert.DoesNotContain("//-", navMenu);
         Assert.DoesNotContain("#if", navMenu);
+    }
+
+    [Fact]
+    public async Task ContentPageUsesCorrectNamespace()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNs");
+        var content = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformNs", "Components", "Developer", "Content.razor"));
+        Assert.Contains("Quilt4Net.Toolkit.Blazor.Features.Language.ContentAdmin", content);
+        Assert.DoesNotContain("Features.Content.ContentAdmin", content);
+    }
+
+    [Fact]
+    public async Task ProgramRegistersAuditScopes()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformScopes");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformScopes", "Program.cs"));
+        Assert.Contains("AuditScopes.Read", program);
+        Assert.Contains("AuditScopes.ApiKeyUsage", program);
+    }
+
+    [Fact]
+    public async Task AppUserServiceUsesToolkitExtensions()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformClaims");
+        var userService = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformClaims", "Features", "Team", "AppUserService.cs"));
+        Assert.Contains("using Tharga.Toolkit;", userService);
+        Assert.Contains("GetEmail()", userService);
+        Assert.Contains("GetDisplayName()", userService);
+        Assert.DoesNotContain("FindFirstValue", userService);
+    }
+
+    [Fact]
+    public async Task AppTeamServiceSetsDisplayNameOnOwner()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformName");
+        var teamService = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformName", "Features", "Team", "AppTeamService.cs"));
+        Assert.Contains("Name = displayName", teamService);
+    }
+
+    [Fact]
+    public async Task NavMenuContainsLanguageSelectorWithQuilt4Net()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformLang");
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformLang", "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("LanguageSelector", navMenu);
+    }
+
+    [Fact]
+    public async Task NavMenuExcludesLanguageSelectorWithoutQuilt4Net()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNoLang", "--IncludeQuilt4Net false");
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformNoLang", "Components", "Layout", "NavMenu.razor"));
+        Assert.DoesNotContain("LanguageSelector", navMenu);
     }
 }

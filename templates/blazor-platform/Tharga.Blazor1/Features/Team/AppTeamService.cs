@@ -21,6 +21,7 @@ public class AppTeamService(
             Members = [new TeamMember
             {
                 Key = user.Key,
+                Name = displayName,
                 LastSeen = DateTime.UtcNow,
                 AccessLevel = AccessLevel.Owner,
                 State = MembershipState.Member
