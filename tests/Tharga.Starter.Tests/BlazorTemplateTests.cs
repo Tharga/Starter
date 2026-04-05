@@ -2,6 +2,7 @@ using Xunit;
 
 namespace Tharga.Starter.Tests;
 
+[Collection("Template")]
 public class BlazorTemplateTests : IAsyncLifetime
 {
     private readonly string _templatePath = Path.Combine(TemplateTestHelper.TemplatesRoot, "blazor");
