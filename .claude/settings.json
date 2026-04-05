@@ -19,7 +19,9 @@
       "Read($DOC_ROOT/**)",
       "Grep(path: $DEV_ROOT/**)",
       "Read($DEV_ROOT/**)",
-      "Read($HOME/.claude/**)"
+      "Read($HOME/.claude/**)",
+      "Bash(grep *)",
+      "Bash(find *)"
     ],
     "deny": []
   }
