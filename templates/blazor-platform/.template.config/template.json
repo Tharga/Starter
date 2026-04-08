@@ -87,7 +87,7 @@
           ]
         },
         {
-          "condition": "(!IncludeHealth || !IncludeSamples)",
+          "condition": "(!IncludeHealth)",
           "exclude": [
             "Tharga.Blazor1/Framework/ComponentService.cs"
           ]
