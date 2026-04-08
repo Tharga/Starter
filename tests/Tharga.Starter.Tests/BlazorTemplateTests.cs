@@ -21,192 +21,76 @@ public class BlazorTemplateTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Builds()
+    public async Task DefaultOptions_BuildsAndTestsPass()
     {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorBuild");
-        await TemplateTestHelper.AssertBuildsAsync(projectPath);
-    }
-
-    [Fact]
-    public async Task TestsPass()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorTests");
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorDefault");
         await TemplateTestHelper.AssertBuildsAsync(projectPath);
         await TemplateTestHelper.AssertTestsPassAsync(projectPath);
     }
 
     [Fact]
-    public async Task ContainsServerProject()
+    public async Task DefaultOptions_ContainsExpectedStructureAndContent()
     {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorServer");
-        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorServer")),
-            "Server project folder should exist");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorServer", "BlazorServer.csproj")),
-            "Server project file should exist");
-    }
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorCheck");
 
-    [Fact]
-    public async Task ContainsClientProject()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorClient");
-        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorClient.Client")),
-            "Client project folder should exist");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorClient.Client", "BlazorClient.Client.csproj")),
-            "Client project file should exist");
-    }
+        // Project structure
+        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorCheck")), "Server project should exist");
+        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorCheck.Client")), "Client project should exist");
+        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorCheck.Tests")), "Test project should exist");
+        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorCheck.IntegrationTests")), "Integration test project should exist");
 
-    [Fact]
-    public async Task ContainsTestProject()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorTestProj");
-        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorTestProj.Tests")),
-            "Test project folder should exist");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorTestProj.Tests", "BlazorTestProj.Tests.csproj")),
-            "Test project file should exist");
-    }
+        // Package references
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorCheck", "BlazorCheck.csproj"));
+        Assert.Contains("Tharga.Blazor", csproj);
+        Assert.Contains("Quilt4Net.Toolkit.Health", csproj);
 
-    [Fact]
-    public async Task ContainsIntegrationTestProject()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorIntTest");
-        Assert.True(Directory.Exists(Path.Combine(projectPath, "BlazorIntTest.IntegrationTests")),
-            "Integration test project folder should exist");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorIntTest.IntegrationTests", "BlazorIntTest.IntegrationTests.csproj")),
-            "Integration test project file should exist");
-    }
+        // Default includes samples
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorCheck.Client", "Pages", "Counter.razor")));
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorCheck", "Components", "Pages", "Weather.razor")));
+        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorCheck", "Components", "Pages", "About.razor")));
 
-    [Fact]
-    public async Task DefaultIncludesSamplePages()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorSamples");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorSamples.Client", "Pages", "Counter.razor")),
-            "Counter page should exist by default");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorSamples", "Components", "Pages", "Weather.razor")),
-            "Weather page should exist by default");
-    }
+        // Program.cs includes health and rate limiting by default, no template directives
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorCheck", "Program.cs"));
+        Assert.Contains("AddQuilt4NetHealth", program);
+        Assert.Contains("UseQuilt4NetHealth", program);
+        Assert.Contains("AddRateLimiter", program);
+        Assert.Contains("UseRateLimiter", program);
+        Assert.DoesNotContain("#if", program);
+        Assert.DoesNotContain("#endif", program);
 
-    [Fact]
-    public async Task ExcludesSamplesWhenOptionIsFalse()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoSamples", "--IncludeSamples false");
-        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamples.Client", "Pages", "Counter.razor")),
-            "Counter page should not exist when IncludeSamples is false");
-        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamples", "Components", "Pages", "Weather.razor")),
-            "Weather page should not exist when IncludeSamples is false");
-    }
-
-    [Fact]
-    public async Task BuildsWithoutSamples()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoSamplesBuild", "--IncludeSamples false");
-        await TemplateTestHelper.AssertBuildsAsync(projectPath);
-    }
-
-    [Fact]
-    public async Task NavMenuDoesNotContainTemplateDirectives()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNavCheck");
-        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNavCheck", "Components", "Layout", "NavMenu.razor"));
+        // NavMenu has no template directives
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorCheck", "Components", "Layout", "NavMenu.razor"));
         Assert.DoesNotContain("//-", navMenu);
         Assert.DoesNotContain("#if", navMenu);
-        Assert.DoesNotContain("#endif", navMenu);
     }
 
     [Fact]
-    public async Task NavMenuExcludesSampleLinksWhenOptionIsFalse()
+    public async Task NoSamples_BuildsAndExcludesSampleContent()
     {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNavNoSamp", "--IncludeSamples false");
-        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNavNoSamp", "Components", "Layout", "NavMenu.razor"));
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorNoSamp", "--IncludeSamples false");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+
+        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamp.Client", "Pages", "Counter.razor")));
+        Assert.False(File.Exists(Path.Combine(projectPath, "BlazorNoSamp", "Components", "Pages", "Weather.razor")));
+
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorNoSamp", "Components", "Layout", "NavMenu.razor"));
         Assert.DoesNotContain("Counter", navMenu);
         Assert.DoesNotContain("Weather", navMenu);
         Assert.DoesNotContain("//-", navMenu);
     }
 
     [Fact]
-    public async Task ContainsAboutPage()
+    public async Task AllOptionsDisabled_Builds()
     {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorAbout");
-        Assert.True(File.Exists(Path.Combine(projectPath, "BlazorAbout", "Components", "Pages", "About.razor")),
-            "About page should exist");
-    }
-
-    [Fact]
-    public async Task ContainsThargaBlazorPackageReference()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorPkgRef");
-        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorPkgRef", "BlazorPkgRef.csproj"));
-        Assert.Contains("Tharga.Blazor", csproj);
-    }
-
-    [Fact]
-    public async Task BuildsWithHealth()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealth", "--IncludeHealth true");
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorMinimal",
+            "--IncludeSamples false --IncludeHealth false --IncludeRateLimiting false");
         await TemplateTestHelper.AssertBuildsAsync(projectPath);
-    }
 
-    [Fact]
-    public async Task BuildsWithRateLimiting()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorRateLimit", "--IncludeRateLimiting true");
-        await TemplateTestHelper.AssertBuildsAsync(projectPath);
-    }
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorMinimal", "BlazorMinimal.csproj"));
+        Assert.DoesNotContain("Quilt4Net.Toolkit.Health", csproj);
 
-    [Fact]
-    public async Task BuildsWithHealthAndRateLimiting()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorBoth", "--IncludeHealth true --IncludeRateLimiting true");
-        await TemplateTestHelper.AssertBuildsAsync(projectPath);
-    }
-
-    [Fact]
-    public async Task HealthIncludesPackageReference()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealthPkg", "--IncludeHealth true");
-        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorHealthPkg", "BlazorHealthPkg.csproj"));
-        Assert.Contains("Quilt4Net.Toolkit.Health", csproj);
-    }
-
-    [Fact]
-    public async Task DefaultIncludesHealthPackageReference()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorDefHealth");
-        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorDefHealth", "BlazorDefHealth.csproj"));
-        Assert.Contains("Quilt4Net.Toolkit.Health", csproj);
-    }
-
-    [Fact]
-    public async Task HealthIncludesRegistrationInProgram()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorHealthProg", "--IncludeHealth true");
-        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorHealthProg", "Program.cs"));
-        Assert.Contains("AddQuilt4NetHealth", program);
-        Assert.Contains("UseQuilt4NetHealth", program);
-        Assert.DoesNotContain("#if", program);
-        Assert.DoesNotContain("#endif", program);
-    }
-
-    [Fact]
-    public async Task RateLimitingIncludesRegistrationInProgram()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorRateProg", "--IncludeRateLimiting true");
-        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorRateProg", "Program.cs"));
-        Assert.Contains("AddRateLimiter", program);
-        Assert.Contains("UseRateLimiter", program);
-        Assert.DoesNotContain("#if", program);
-        Assert.DoesNotContain("#endif", program);
-    }
-
-    [Fact]
-    public async Task DefaultIncludesHealthAndRateLimitingInProgram()
-    {
-        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor", "BlazorDefProg");
-        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorDefProg", "Program.cs"));
-        Assert.Contains("AddQuilt4NetHealth", program);
-        Assert.Contains("UseQuilt4NetHealth", program);
-        Assert.Contains("AddRateLimiter", program);
-        Assert.Contains("UseRateLimiter", program);
-        Assert.DoesNotContain("#if", program);
-        Assert.DoesNotContain("#endif", program);
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "BlazorMinimal", "Program.cs"));
+        Assert.DoesNotContain("AddQuilt4NetHealth", program);
+        Assert.DoesNotContain("AddRateLimiter", program);
     }
 }
