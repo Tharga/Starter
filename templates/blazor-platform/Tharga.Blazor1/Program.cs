@@ -98,10 +98,7 @@ builder.AddQuilt4NetBlazorContent();
 #if (IncludeHealth)
 builder.AddQuilt4NetHealth(o =>
 {
-#if (IncludeSamples)
-    // Sample component service — see https://github.com/Quilt4/Quilt4Net.Toolkit for documentation.
     o.AddComponentService<ComponentService>();
-#endif
 });
 #endif
 #if (IncludeRateLimiting)
