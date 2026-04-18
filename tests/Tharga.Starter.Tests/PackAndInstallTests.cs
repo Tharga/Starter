@@ -5,6 +5,7 @@ using Xunit;
 namespace Tharga.Starter.Tests;
 
 [Collection("Template")]
+[Trait("Category", "Slow")]
 public class PackAndInstallTests : IAsyncLifetime
 {
     private static readonly string RepoRoot =

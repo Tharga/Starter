@@ -21,6 +21,7 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task DefaultOptions_Builds()
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformBuild");
@@ -92,6 +93,7 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task NoSamples_Builds()
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNoSamp", "--IncludeSamples false");
@@ -99,6 +101,7 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Category", "Slow")]
     public async Task AllOptionsDisabled_Builds()
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformMin",
