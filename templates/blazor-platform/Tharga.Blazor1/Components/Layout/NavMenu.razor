@@ -50,6 +50,9 @@
                 <RadzenPanelMenuItem Text="Developer" Icon="logo_dev">
                     <RadzenPanelMenuItem Text="Database" Icon="database" Path="/developer/database" />
                     <RadzenPanelMenuItem Text="Users" Icon="person" Path="/developer/user" />
+//-#if (IncludeCache)
+                    <RadzenPanelMenuItem Text="Cache" Icon="cached" Path="/developer/cache" />
+//-#endif
 //-#if (IncludeQuilt4Net)
                     <RadzenPanelMenuItem Text="Log" Icon="view_object_track" Path="/developer/log" />
                     <RadzenPanelMenuItem Text="Content" Icon="book_2" Path="/developer/content" />

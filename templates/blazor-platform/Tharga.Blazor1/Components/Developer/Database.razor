@@ -1,23 +1,41 @@
 @page "/developer/database"
+@using Tharga.MongoDB.Blazor
 @attribute [Authorize(Roles = Roles.Developer)]
 @inject BreadCrumbService BreadCrumbService
+
+<RadzenCard Style="margin-bottom: 6px;">
+    <Tharga.MongoDB.Blazor.MonitorToolbar OnCallsReset="OnCallsReset" OnCacheReset="OnCacheReset" />
+</RadzenCard>
 
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="Collections">
-            <Tharga.MongoDB.Blazor.CollectionView />
+            <Tharga.MongoDB.Blazor.CollectionView @ref="_collectionView" />
         </RadzenTabsItem>
         <RadzenTabsItem Text="Calls">
-            <Tharga.MongoDB.Blazor.CallView />
+            <Tharga.MongoDB.Blazor.CallView @ref="_callView" />
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
 
 @code {
+    private CollectionView _collectionView;
+    private CallView _callView;
+
     protected override Task OnInitializedAsync()
     {
         BreadCrumbService.UnlinkSegment("developer");
 
         return base.OnInitializedAsync();
+    }
+
+    private async Task OnCallsReset()
+    {
+        if (_callView != null) await _callView.RefreshAsync();
+    }
+
+    private async Task OnCacheReset()
+    {
+        if (_collectionView != null) await _collectionView.RefreshAsync();
     }
 }

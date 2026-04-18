@@ -36,6 +36,12 @@
       "defaultValue": "true",
       "description": "Include Quilt4Net logging, remote configuration, and content"
     },
+    "IncludeCache": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include Tharga.Cache with a developer page for cache monitoring"
+    },
     "httpPort": {
       "type": "generated",
       "generator": "port",
@@ -96,8 +102,16 @@
           "condition": "(!IncludeQuilt4Net)",
           "exclude": [
             "Tharga.Blazor1/Components/Developer/Log.razor",
+            "Tharga.Blazor1/Components/Developer/LogDetail.razor",
+            "Tharga.Blazor1/Components/Developer/LogSummary.razor",
             "Tharga.Blazor1/Components/Developer/Content.razor",
             "Tharga.Blazor1/Components/Developer/Configuration.razor"
+          ]
+        },
+        {
+          "condition": "(!IncludeCache)",
+          "exclude": [
+            "Tharga.Blazor1/Components/Developer/Cache.razor"
           ]
         }
       ]

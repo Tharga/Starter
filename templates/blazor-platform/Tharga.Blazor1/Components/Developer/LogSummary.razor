@@ -1,22 +1,22 @@
-@page "/developer/log"
-@using Quilt4Net.Toolkit.Features.ApplicationInsights
+@page "/developer/log/summary/{Fingerprint}"
 @using Quilt4Net.Toolkit.Blazor.Features.Log
 @attribute [Authorize(Roles = Roles.Developer)]
 @inject BreadCrumbService BreadCrumbService
 
-<LogView Context="@ApplicationInsightsContextExtensions.Current"
-         DetailPath="/developer/log/detail"
-         SummaryPath="/developer/log/summary"
-         Tab="@Tab" />
+<LogSummaryView Fingerprint="@Fingerprint" Params="@P" DetailPath="/developer/log/detail" />
 
 @code {
+    [Parameter]
+    public string Fingerprint { get; set; }
+
     [Parameter, SupplyParameterFromQuery]
-    public string Tab { get; set; }
+    public string P { get; set; }
 
     protected override Task OnInitializedAsync()
     {
         BreadCrumbService.UnlinkSegment("developer");
         BreadCrumbService.UnlinkSegment("log");
+        BreadCrumbService.RelinkSegment("summary", "/developer/log?tab=summary");
 
         return base.OnInitializedAsync();
     }
