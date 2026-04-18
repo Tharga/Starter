@@ -12,3 +12,4 @@ Dotnet project templates (dotnet new) for scaffolding applications with Tharga p
 - **Plan directory**: `$DOC_ROOT/Tharga/plans/Starter`
 - **Backlog**: `$DOC_ROOT/Tharga/Starter.md`
 - **Incoming requests**: `$DOC_ROOT/Tharga/Requests.md` — check sections "Tharga.Starter" and "Uppföljning" on startup
+- **Eplicta requests**: `$DEV_ROOT/Eplicta/plan/requests.md` — check for requests from Eplicta on startup
