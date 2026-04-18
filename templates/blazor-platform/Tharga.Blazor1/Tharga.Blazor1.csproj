@@ -7,20 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Tharga.Team.Blazor" Version="2.0.5" />
-    <PackageReference Include="Tharga.Team.Service" Version="2.0.5" />
-    <PackageReference Include="Tharga.Team.MongoDB" Version="2.0.6" />
-    <PackageReference Include="Tharga.Toolkit.Standard" Version="1.15.20" />
-    <PackageReference Include="Tharga.MongoDB.Blazor" Version="2.10.0" />
+    <PackageReference Include="Tharga.Team.Blazor" Version="2.0.10" />
+    <PackageReference Include="Tharga.Team.Service" Version="2.0.10" />
+    <PackageReference Include="Tharga.Team.MongoDB" Version="2.0.10" />
+    <PackageReference Include="Tharga.Toolkit.Standard" Version="1.15.21" />
+    <PackageReference Include="Tharga.MongoDB.Blazor" Version="2.10.3" />
     <!--#if (IncludeHealth) -->
-    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.9" />
+    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.16" />
     <!--#endif -->
     <!--#if (IncludeQuilt4Net) -->
-    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.9" />
-    <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.9" />
+    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.16" />
+    <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.16" />
     <!--#endif -->
     <ProjectReference Include="..\Tharga.Blazor1.Client\Tharga.Blazor1.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.6" />
   </ItemGroup>
 
   <Target Name="RemoveClientRuntimeConfig" AfterTargets="Publish">

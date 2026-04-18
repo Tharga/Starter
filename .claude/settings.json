@@ -1,4 +1,8 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },  
   "permissions": {
     "allow": [
       "Bash(dotnet *)",
@@ -16,6 +20,8 @@
       "Bash(taskkill *)",
       "Bash(cd *)",
       "Bash(git *)",
+      "Bash(cd * && git *)",
+      "Bash(cd * && git * && git *)",
       "Read($DOC_ROOT/**)",
       "Grep(path: $DEV_ROOT/**)",
       "Read($DEV_ROOT/**)",
