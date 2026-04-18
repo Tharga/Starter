@@ -3,11 +3,15 @@
   <PropertyGroup>
     <PackageType>Template</PackageType>
     <PackageId>Tharga.Starter</PackageId>
-    <PackageVersion>0.1.0</PackageVersion>
     <Title>Tharga Starter Templates</Title>
     <Authors>Tharga</Authors>
     <Description>Dotnet project templates for building applications with Tharga packages.</Description>
-    <PackageTags>dotnet-new;templates;tharga</PackageTags>
+    <PackageTags>dotnet-new;templates;tharga;blazor;console</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Tharga/Starter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Tharga/Starter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <TargetFramework>net9.0</TargetFramework>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -17,7 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="templates/**/*" Exclude="templates/**/bin/**;templates/**/obj/**" />
+    <Content Include="templates/**/*" Exclude="templates/**/bin/**;templates/**/obj/**;templates/**/.vs/**" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
     <Compile Remove="**/*" />
   </ItemGroup>
 
