@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="Tharga.Blazor1/Tharga.Blazor1.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Tharga.Blazor1.Client/Tharga.Blazor1.Client.csproj" />
+  <Project Path="Tharga.Blazor1.Tests/Tharga.Blazor1.Tests.csproj" />
+  <Project Path="Tharga.Blazor1.IntegrationTests/Tharga.Blazor1.IntegrationTests.csproj" />
+</Solution>

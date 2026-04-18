@@ -1,0 +1,25 @@
+<RadzenHeader>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Stretch" JustifyContent="JustifyContent.SpaceBetween" Gap="0">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+            <RadzenSidebarToggle Click="@(() => _menuExpanded = !_menuExpanded)" />
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                <BreadCrumbs ShowRoot="true" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenHeader>
+
+<RadzenSidebar Responsive="false" Style="width: max-content">
+    <RadzenPanelMenu DisplayStyle="@(_menuExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="false">
+        <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
+//-#if (IncludeSamples)
+        <RadzenPanelMenuItem Text="Counter" Icon="exposure_plus_1" Path="/counter" />
+        <RadzenPanelMenuItem Text="Weather" Icon="weather_mix" Path="/weather" />
+//-#endif
+        <RadzenPanelMenuItem Text="About" Icon="info" Path="/about" />
+    </RadzenPanelMenu>
+</RadzenSidebar>
+
+@code {
+    bool _menuExpanded = true;
+}

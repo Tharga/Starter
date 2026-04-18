@@ -1,0 +1,23 @@
+@page "/developer/database"
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Collections">
+            <Tharga.MongoDB.Blazor.CollectionView />
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Calls">
+            <Tharga.MongoDB.Blazor.CallView />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}

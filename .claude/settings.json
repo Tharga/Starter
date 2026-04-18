@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet *)",
+      "Bash(nuget *)",
+      "Bash(mkdir *)",
+      "Bash(rm -rf *)",
+      "Bash(cp *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(for *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(grep *)",
+      "Bash(xargs *)",
+      "Bash(taskkill *)",
+      "Bash(cd *)",
+      "Bash(git *)",
+      "Read($DOC_ROOT/**)",
+      "Grep(path: $DEV_ROOT/**)",
+      "Read($DEV_ROOT/**)",
+      "Read($HOME/.claude/**)",
+      "Bash(grep *)",
+      "Bash(find *)"
+    ],
+    "deny": []
+  }
+}

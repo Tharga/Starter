@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tharga.Team.Blazor" Version="2.0.5" />
+    <PackageReference Include="Tharga.Team.Service" Version="2.0.5" />
+    <PackageReference Include="Tharga.Team.MongoDB" Version="2.0.6" />
+    <PackageReference Include="Tharga.Toolkit.Standard" Version="1.15.20" />
+    <PackageReference Include="Tharga.MongoDB.Blazor" Version="2.10.0" />
+    <!--#if (IncludeHealth) -->
+    <PackageReference Include="Quilt4Net.Toolkit.Health" Version="0.6.9" />
+    <!--#endif -->
+    <!--#if (IncludeQuilt4Net) -->
+    <PackageReference Include="Quilt4Net.Toolkit.Api" Version="0.6.9" />
+    <PackageReference Include="Quilt4Net.Toolkit.Blazor" Version="0.6.9" />
+    <!--#endif -->
+    <ProjectReference Include="..\Tharga.Blazor1.Client\Tharga.Blazor1.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
+  </ItemGroup>
+
+  <Target Name="RemoveClientRuntimeConfig" AfterTargets="Publish">
+    <Delete Files="$(PublishDir)Tharga.Blazor1.Client.runtimeconfig.json" />
+  </Target>
+
+</Project>

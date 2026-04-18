@@ -1,0 +1,23 @@
+@page "/developer/configuration"
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Feature Toggles" Icon="toggle_off">
+            <Quilt4Net.Toolkit.Blazor.Features.Configuration.RemoteConfigurationAdmin TogglesOnly="true" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Remote Configuration" Icon="settings_system_daydream">
+            <Quilt4Net.Toolkit.Blazor.Features.Configuration.RemoteConfigurationAdmin />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}
