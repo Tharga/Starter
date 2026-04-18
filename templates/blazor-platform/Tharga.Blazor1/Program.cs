@@ -10,6 +10,9 @@ using Tharga.Team.Blazor.Framework;
 using Tharga.Team.MongoDB;
 using Tharga.Team.Service;
 using Tharga.Team.Service.Audit;
+#if (IncludeCache)
+using Tharga.Cache;
+#endif
 #if (IncludeHealth)
 using Quilt4Net.Toolkit.Health;
 #endif
@@ -60,6 +63,11 @@ builder.Services.AddThargaTeamRepository(o =>
 
 // MongoDB
 builder.AddMongoDB();
+
+#if (IncludeCache)
+// Tharga.Cache — see https://github.com/Tharga/Cache for documentation.
+builder.Services.AddCache();
+#endif
 
 // Step 5: API Key Authentication
 builder.Services.AddThargaApiKeys();
