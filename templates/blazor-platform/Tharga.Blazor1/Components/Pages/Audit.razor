@@ -34,7 +34,7 @@ else
 
         var user = HttpContextAccessor.HttpContext?.User;
         var hasAuditRead = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.Read) ?? false;
-        var hasApiKeyUsage = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.ApiKeyUsage) ?? false;
+        var hasApiKeyUsage = user?.HasClaim(TeamClaimTypes.Scope, AppAuditScopes.ApiKeyUsage) ?? false;
 
         if (hasAuditRead)
         {

@@ -22,28 +22,36 @@
   - Open: Radzen 10 to 13 and Tharga.Console 3.* to 4.x are major bumps, awaiting the user's decision.
 
 ### 3. Bump versions
-- [ ] Update `.csproj` files (blazor-platform first, then blazor and console)
-- [ ] Build the generated project; fix compile errors
+- [x] Updated `.csproj` files in blazor-platform, blazor and console to the latest stable that works on .NET 10 (user decision: highest possible, keep .NET 10; Microsoft.AspNetCore.* on 10.0.15, not 11.0.0; Radzen 13.2.1; Tharga.Console 4.*).
+- [x] Tharga.Console 4.x supports only net10.0/net11.0 (NU1202 on net9.0), so the **console template and its test project moved from net9.0 to net10.0**. `Tharga.Starter.Tests` (test host, not a template) stays on net9.0; CI already installs the 9.0 and 10.0 SDKs.
 
 ### 4. Adapt template code
-- [ ] Move to the current Tharga.Team entry point; remove hand-wired registrations that are now redundant
-- [ ] Quilt4Net 1.x registrations; add `AddQuilt4NetContent()` (issue #2)
-- [ ] Add a test that guards #2 (template with IncludeQuilt4Net contains the content registration)
+- [x] `Program.cs` uses `AddThargaTeam(...)` / `UseThargaTeam()`; scopes, tenant roles and audit moved into its options. Explicit UseRouting/UseAuthentication/UseAuthorization kept.
+- [x] Template's `AuditScopes` clashed with `Tharga.Team.AuditScopes`; renamed to `AppAuditScopes` (only `ApiKeyUsage`), the toolkit's `AuditScopes.Read` is used.
+- [x] `ShowMemberRoles` option removed in Team 4.x; now `ShowRoles="true"` on `TeamComponent` in `Teams.razor`. `ShowScopeOverrides` was false (the default), so unset.
+- [x] Quilt4Net 1.x: `AddQuilt4NetApiLogging` (obsolete) replaced by `AddQuilt4NetLogging().AddHttpRequestLogging()`, plus `app.UseQuilt4NetLogging()` (the old setup never added the middleware).
+- [x] Issue #2: no `AddQuilt4NetContent()` added. In Quilt4Net.Toolkit 1.0.32 `AddQuilt4NetBlazorContent` calls `AddQuilt4NetContent` itself, so the upgrade fixes it. **Not verified at runtime** (needs a running app with `Quilt4Net:ApiKey` only); guarded by a template test that checks the registration is present.
+- [x] Test added: `IncludeQuilt4Net_RegistersContentAndUsesCurrentLogging`. Updated `DefaultOptions_ContainsExpectedStructureAndContent` to the new entry points.
 
 ### 5. Verify
-- [ ] Full test suite + template integration tests; compare test count with baseline
-- [ ] `dotnet new` + build for: defaults, each of IncludeQuilt4Net / IncludeHealth / IncludeCache on and off
-- [ ] Clean restore: NU190x warnings gone, or documented
+- [x] Full suite, run one class at a time (2026-11-21): **23 tests, all pass** (Console 6, PackAndInstall 4, Blazor 4, BlazorPlatform 9). Baseline was 22; +1 new test.
+- [x] Default `blazor-platform` project builds with 0 errors, 0 warnings, 0 NU190x (including its Tests and IntegrationTests projects).
+- [ ] Explicit `dotnet list package --vulnerable --include-transitive` after the upgrade (not rerun; the clean build above shows no NU190x warnings).
+- [ ] Not covered by a test: IncludeHealth=false alone and IncludeRateLimiting on/off individually (defaults, AllOptionsDisabled, NoSamples and IncludeCache are covered).
+- [ ] Runtime check of the generated app (Radzen 10 to 13 and Team 2 to 4 UI changes are compile-checked only). Needs the user to run it.
 
 ### 6. Docs
-- [ ] Update template README (and root README if it lists versions)
+- [x] `templates/blazor-platform/README.md`: added how the features are registered (`AddThargaTeam`) and the starting package versions. Root README had nothing version-specific.
 
 ### 7. Finish
-- [ ] Commit at milestones (conventional commits), full test run before each commit
-- [ ] Summarize; user tests; closing only on user's word
+- [x] Full test run before commit (23 pass). Commit with conventional message, no attribution lines (user instruction).
+- [~] Push and open PR to `develop` (user approved push and PR).
+- [ ] User tests the generated app; closing (#3, #2, archive plan) only on the user's word
 
 ## Notes
 - Public repo: no internal project names or tracker numbers beyond the GitHub issue in commit/PR text.
 
 ## Last session
-Branch `feature/update-blazor-platform-packages` created from `develop`. Plan drafted, awaiting user approval before any code changes.
+2026-11-21: Baseline recorded, all templates bumped to latest stable on .NET 10, `blazor-platform` moved to `AddThargaTeam`/`UseThargaTeam` and Quilt4Net 1.x logging, console template moved to net10.0, tests updated (+1), README updated. 23 tests pass. PR opened to `develop`.
+
+Next: the user runs a generated project and checks the UI (Radzen 13, Team 4) and that `Quilt4Net:ApiKey` alone no longer breaks the content connectivity check (#2). Then close #3 and #2 and archive this plan to `plans/Starter/done/` on the user's word. README root/docs need no further change.

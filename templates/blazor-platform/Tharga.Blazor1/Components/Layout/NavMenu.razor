@@ -78,7 +78,7 @@
 
         var user = HttpContextAccessor.HttpContext?.User;
         _canViewAudit = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.Read) == true
-                     || user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.ApiKeyUsage) == true;
+                     || user?.HasClaim(TeamClaimTypes.Scope, AppAuditScopes.ApiKeyUsage) == true;
         _canManageApiKeys = user?.HasClaim(TeamClaimTypes.Scope, ApiKeyScopes.Manage) == true;
 
         await base.OnInitializedAsync();
