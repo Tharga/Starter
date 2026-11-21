@@ -146,6 +146,95 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DefaultOptions_ContainsProjectDefaults()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformDefaults");
+        var root = Path.Combine(projectPath, "PlatformDefaults");
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+
+        // Configuration the existing Tharga projects have converged on.
+        Assert.Contains("o.ApiKey.AdvancedMode = true", program);
+        Assert.Contains("o.Blazor.Simulation.Enabled = true", program);
+        Assert.Contains("o.Blazor.Consent.ShowToggle = true", program);
+        Assert.Contains("o.Blazor.Consent.AccessLevel = AccessLevel.Administrator", program);
+        Assert.Contains("AuditStorageMode.Logger | AuditStorageMode.MongoDB", program);
+        Assert.Contains("o.Controllers.SwaggerTitle", program);
+        Assert.Contains("AddClaimsEnricher<DeveloperRoleEnricher>", program);
+        Assert.Contains("ConfigureSystemRoles", program);
+        Assert.Contains("Roles.Developer", program);
+
+        // Tharga.Team registers audit:read itself; registering it again throws at startup.
+        Assert.DoesNotContain("scopes.Register(AuditScopes.Read", program);
+
+        // Optional modules on by default, dynamic roles off.
+        Assert.Contains("AddThargaMcp", program);
+        Assert.Contains("UseThargaMcp", program);
+        Assert.Contains("AddThargaEntraUserDirectory", program);
+        Assert.DoesNotContain("EnableDynamicRoles", program);
+        Assert.False(File.Exists(Path.Combine(root, "Components", "Pages", "CustomRoles.razor")));
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(root, "PlatformDefaults.csproj"));
+        Assert.Contains("Tharga.Team.Mcp", csproj);
+        Assert.Contains("Tharga.Team.Entra", csproj);
+
+        // Pages and the role grant
+        Assert.True(File.Exists(Path.Combine(root, "Framework", "DeveloperRoleEnricher.cs")));
+        Assert.True(File.Exists(Path.Combine(root, "Components", "Developer", "SystemApiKeys.razor")));
+        var apiKeys = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Pages", "ApiKeys.razor"));
+        Assert.Contains("ShowRoles=\"true\"", apiKeys);
+        Assert.Contains("ShowScopeOverrides=\"true\"", apiKeys);
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("AccessSimulationBar", navMenu);
+        Assert.DoesNotContain("\"/roles\"", navMenu);
+        var settings = await File.ReadAllTextAsync(Path.Combine(root, "appsettings.json"));
+        Assert.Contains("Developers", settings);
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task DefaultOptions_StartsUp()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformStart");
+        await TemplateTestHelper.AssertGeneratedAppStartsAsync(projectPath, "PlatformStart");
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task McpAndEntraDisabled_LeaveNoTraces_AndBuild()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNoMods", "--IncludeMcp false --IncludeEntra false");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+
+        var root = Path.Combine(projectPath, "PlatformNoMods");
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+        Assert.DoesNotContain("AddThargaMcp", program);
+        Assert.DoesNotContain("UseThargaMcp", program);
+        Assert.DoesNotContain("mcp:discover", program);
+        Assert.DoesNotContain("AddThargaEntraUserDirectory", program);
+        Assert.DoesNotContain("WriteNameToDirectory", program);
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(root, "PlatformNoMods.csproj"));
+        Assert.DoesNotContain("Tharga.Team.Mcp", csproj);
+        Assert.DoesNotContain("Tharga.Team.Entra", csproj);
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task IncludeDynamicRoles_AddsRolesPage_AndStartsUp()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformRoles", "--IncludeDynamicRoles true");
+        var root = Path.Combine(projectPath, "PlatformRoles");
+
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+        Assert.Contains("o.EnableDynamicRoles = true", program);
+        Assert.True(File.Exists(Path.Combine(root, "Components", "Pages", "CustomRoles.razor")));
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("\"/roles\"", navMenu);
+
+        await TemplateTestHelper.AssertGeneratedAppStartsAsync(projectPath, "PlatformRoles");
+    }
+
+    [Fact]
     public async Task DatabasePageHasMonitorToolbar()
     {
         var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformDb");
