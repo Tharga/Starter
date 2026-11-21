@@ -39,21 +39,36 @@ builder.Services.AddRadzenCookieThemeService(options =>
     options.Duration = TimeSpan.FromDays(365);
 });
 
-// Step 2: Authentication
-builder.AddThargaAuth();
-
-// Step 3: API Controllers & Swagger
-builder.Services.AddThargaControllers();
-
-// Step 4: Team Management
-builder.Services.AddThargaTeamBlazor(o =>
+// Step 2: Tharga Team — one call registers authentication, API key authentication, API controllers
+// & Swagger, the team management UI, scopes, tenant roles and audit logging.
+// See https://github.com/Tharga/Team for documentation.
+builder.AddThargaTeam(o =>
 {
-    o.Title = "Tharga.Blazor1";
-    o.SkipAuthStateDecoration = true;
-    o.RegisterTeamService<AppTeamService, AppUserService, TeamMember>();
-    o.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
-    o.ShowMemberRoles = true;
-    o.ShowScopeOverrides = false;
+    o.Blazor.Title = "Tharga.Blazor1";
+    o.Blazor.SkipAuthStateDecoration = true;
+    o.Blazor.RegisterTeamService<AppTeamService, AppUserService, TeamMember>();
+    o.Blazor.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
+
+    // Scopes
+    o.ConfigureScopes = scopes =>
+    {
+        scopes.Register(AuditScopes.Read, AccessLevel.User);
+        scopes.Register(AppAuditScopes.ApiKeyUsage, AccessLevel.User);
+        // Register application-specific scopes here:
+        // scopes.Register("feature:read", AccessLevel.Viewer);
+        // scopes.Register("feature:write", AccessLevel.User);
+    };
+
+    // Tenant roles
+    o.ConfigureTenantRoles = roles =>
+    {
+        roles.Register("TeamDeveloper", new[] { ApiKeyScopes.Manage });
+        // Register application-specific roles here:
+        // roles.Register("Editor", new[] { "feature:read", "feature:write" });
+    };
+
+    // Audit logging
+    o.Audit = new AuditOptions();
 });
 builder.Services.AddThargaTeamRepository(o =>
 {
@@ -69,36 +84,11 @@ builder.AddMongoDB();
 builder.Services.AddCache();
 #endif
 
-// Step 5: API Key Authentication
-builder.Services.AddThargaApiKeys();
-builder.Services.AddAuthentication()
-    .AddThargaApiKeyAuthentication();
-
-// Step 6: Scopes
-builder.Services.AddThargaScopes(scopes =>
-{
-    scopes.Register(AuditScopes.Read, AccessLevel.User);
-    scopes.Register(AuditScopes.ApiKeyUsage, AccessLevel.User);
-    // Register application-specific scopes here:
-    // scopes.Register("feature:read", AccessLevel.Viewer);
-    // scopes.Register("feature:write", AccessLevel.User);
-});
-
-// Step 7: Tenant Roles
-builder.Services.AddThargaTenantRoles(roles =>
-{
-    roles.Register("TeamDeveloper", new[] { ApiKeyScopes.Manage });
-    // Register application-specific roles here:
-    // roles.Register("Editor", new[] { "feature:read", "feature:write" });
-});
-
-// Step 8: Audit Logging
-builder.Services.AddThargaAuditLogging();
-
 #if (IncludeQuilt4Net)
-// Quilt4Net: API logging, remote configuration, and content management.
+// Quilt4Net: logging (incl. HTTP request logging), remote configuration, and content management.
 // See https://github.com/Quilt4/Quilt4Net.Toolkit for documentation.
-builder.AddQuilt4NetApiLogging();
+builder.AddQuilt4NetLogging()
+    .AddHttpRequestLogging();
 builder.AddQuilt4NetRemoteConfiguration();
 builder.AddQuilt4NetBlazorContent();
 #endif
@@ -139,6 +129,9 @@ else
 }
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+#if (IncludeQuilt4Net)
+app.UseQuilt4NetLogging();
+#endif
 #if (IncludeRateLimiting)
 app.UseRateLimiter();
 #endif
@@ -148,9 +141,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// Auth & Controllers middleware
-app.UseThargaAuth();
-app.UseThargaControllers();
+// Tharga Team middleware (authentication endpoints, controllers, Swagger)
+app.UseThargaTeam();
 
 #if (IncludeHealth)
 app.UseQuilt4NetHealth();

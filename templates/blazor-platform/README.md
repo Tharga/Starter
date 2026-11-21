@@ -86,6 +86,17 @@ All settings go in `appsettings.json` or User Secrets:
 | Tenant Roles | Named roles that bundle scopes |
 | Audit Logging | Service call and auth event logging |
 
+Authentication, API controllers, team management, API key auth, scopes, tenant roles and audit
+logging are all registered by one call, `builder.AddThargaTeam(...)`, with `app.UseThargaTeam()` in the
+request pipeline (see `Program.cs`). Add your own scopes and roles in the `ConfigureScopes` and
+`ConfigureTenantRoles` callbacks. See [Tharga.Team](https://github.com/Tharga/Team) for the options.
+
+## Packages
+
+The template starts on Tharga.Team 4.x, Tharga.MongoDB.Blazor 2.x, Tharga.Cache.Blazor 1.x (with
+`IncludeCache`), Quilt4Net.Toolkit 1.x (with `IncludeQuilt4Net` and `IncludeHealth`), Radzen.Blazor 13.x and
+ASP.NET Core 10.0.x, on .NET 10. Check for newer versions with `dotnet list package --outdated`.
+
 ## Project structure
 
 | Project | Description |

@@ -69,13 +69,15 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
 
         // Program.cs — all platform registrations, no template directives
         var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformCheck", "Program.cs"));
-        Assert.Contains("AddThargaAuth", program);
-        Assert.Contains("AddThargaControllers", program);
-        Assert.Contains("AddThargaTeamBlazor", program);
-        Assert.Contains("AddThargaApiKeys", program);
-        Assert.Contains("AddThargaScopes", program);
-        Assert.Contains("AddThargaTenantRoles", program);
-        Assert.Contains("AddThargaAuditLogging", program);
+        // Tharga.Team 4.x registers auth, API keys, controllers, team UI, scopes, roles and audit through one entry point.
+        Assert.Contains("AddThargaTeam(", program);
+        Assert.Contains("UseThargaTeam()", program);
+        Assert.Contains("ConfigureScopes", program);
+        Assert.Contains("ConfigureTenantRoles", program);
+        Assert.Contains("o.Audit", program);
+        Assert.DoesNotContain("AddThargaAuth(", program);
+        Assert.DoesNotContain("AddThargaTeamBlazor(", program);
+        Assert.DoesNotContain("AddThargaControllers(", program);
         Assert.DoesNotContain("#if", program);
         Assert.DoesNotContain("#endif", program);
 
@@ -118,6 +120,26 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
         // NavMenu excludes LanguageSelector
         var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformMin", "Components", "Layout", "NavMenu.razor"));
         Assert.DoesNotContain("LanguageSelector", navMenu);
+    }
+
+    [Fact]
+    public async Task IncludeQuilt4Net_RegistersContentAndUsesCurrentLogging()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformQ4N", "--IncludeQuilt4Net true");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformQ4N", "Program.cs"));
+
+        // Content options must be registered, or IConnectionService throws on Service.Content when
+        // Quilt4Net:Content is not configured (Tharga/Starter#2). Quilt4Net.Toolkit 1.x registers them
+        // from AddQuilt4NetBlazorContent; a host that calls neither gets a null content address.
+        Assert.True(program.Contains("AddQuilt4NetBlazorContent") || program.Contains("AddQuilt4NetContent"),
+            "Program.cs must register Quilt4Net content.");
+        Assert.Contains("AddQuilt4NetRemoteConfiguration", program);
+
+        // Current logging entry points; AddQuilt4NetApiLogging is obsolete in Quilt4Net.Toolkit 1.x.
+        Assert.Contains("AddQuilt4NetLogging", program);
+        Assert.Contains("AddHttpRequestLogging", program);
+        Assert.Contains("UseQuilt4NetLogging", program);
+        Assert.DoesNotContain("AddQuilt4NetApiLogging", program);
     }
 
     [Fact]
