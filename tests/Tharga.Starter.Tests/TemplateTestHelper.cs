@@ -46,6 +46,33 @@ internal static class TemplateTestHelper
         Assert.True(result.ExitCode == 0, $"Tests failed:\n{result.Output}\n{result.Error}");
     }
 
+    /// <summary>
+    /// Runs the generated project's own integration tests, which start the real application. A template that
+    /// compiles can still throw while the host is built (a scope registered twice, a missing registration), and a
+    /// build alone does not see that. Placeholder configuration stands in for what a developer supplies.
+    /// </summary>
+    public static async Task AssertGeneratedAppStartsAsync(string projectPath, string projectName)
+    {
+        var integrationTests = Path.Combine(projectPath, $"{projectName}.IntegrationTests");
+        var result = await RunAsync("dotnet", $"test \"{integrationTests}\" -c Release", PlaceholderConfiguration);
+        Assert.True(result.ExitCode == 0, $"The generated app did not start:\n{result.Output}\n{result.Error}");
+    }
+
+    private static readonly IReadOnlyDictionary<string, string> BuildIsolation = new Dictionary<string, string>
+    {
+        ["MSBUILDDISABLENODEREUSE"] = "1",
+        ["UseSharedCompilation"] = "false",
+        ["DOTNET_CLI_USE_MSBUILD_SERVER"] = "0"
+    };
+
+    private static readonly IReadOnlyDictionary<string, string> PlaceholderConfiguration = new Dictionary<string, string>
+    {
+        ["ConnectionStrings__Default"] = "mongodb://localhost:27017/startupcheck",
+        ["AzureAd__Authority"] = "https://example.ciamlogin.com/example.onmicrosoft.com",
+        ["AzureAd__ClientId"] = "00000000-0000-0000-0000-000000000000",
+        ["AzureAd__TenantId"] = "00000000-0000-0000-0000-000000000000"
+    };
+
     public static void Cleanup(string tempDir)
     {
         try
@@ -59,7 +86,7 @@ internal static class TemplateTestHelper
         }
     }
 
-    private static async Task<ProcessResult> RunAsync(string fileName, string arguments)
+    private static async Task<ProcessResult> RunAsync(string fileName, string arguments, IReadOnlyDictionary<string, string>? environment = null)
     {
         using var process = new Process
         {
@@ -73,6 +100,15 @@ internal static class TemplateTestHelper
                 CreateNoWindow = true
             }
         };
+
+        // A build that leaves worker processes behind keeps the redirected output pipe open until they time out
+        // (MSBuild idles its nodes for 15 minutes), so reading to the end of the output waited that long.
+        foreach (var (key, value) in BuildIsolation) process.StartInfo.Environment[key] = value;
+
+        if (environment != null)
+        {
+            foreach (var (key, value) in environment) process.StartInfo.Environment[key] = value;
+        }
 
         process.Start();
         var output = await process.StandardOutput.ReadToEndAsync();

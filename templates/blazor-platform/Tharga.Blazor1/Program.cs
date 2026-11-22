@@ -13,6 +13,13 @@ using Tharga.Team.Service.Audit;
 #if (IncludeCache)
 using Tharga.Cache;
 #endif
+#if (IncludeMcp)
+using Tharga.Mcp;
+using Tharga.Team.Mcp;
+#endif
+#if (IncludeEntra)
+using Tharga.Team.Entra;
+#endif
 #if (IncludeHealth)
 using Quilt4Net.Toolkit.Health;
 #endif
@@ -49,26 +56,66 @@ builder.AddThargaTeam(o =>
     o.Blazor.RegisterTeamService<AppTeamService, AppUserService, TeamMember>();
     o.Blazor.RegisterApiKeyAdministrationService<ApiKeyAdministrationService>();
 
-    // Scopes
+    // Grants the Developer role to the addresses in Developers:Emails (see DeveloperRoleEnricher).
+    o.Blazor.AddClaimsEnricher<DeveloperRoleEnricher>();
+
+    // Let a team administrator view the app as a less privileged member (off by default in the library).
+    o.Blazor.Simulation.Enabled = true;
+
+    // Teams can consent to let Developers in to help; the toggle is shown on the team page.
+    o.Blazor.Consent.ShowToggle = true;
+    o.Blazor.Consent.AccessLevel = AccessLevel.Administrator;
+    // Consent.GrantTeamsRead = true would let Developers see every team (not just consenting ones). It is
+    // off here on purpose; turn it on if your Developers need cross-team visibility.
+
+    // Advanced mode unlocks the full API key UI (access level, roles, scope overrides, tags).
+    o.ApiKey.AdvancedMode = true;
+    o.Controllers.SwaggerTitle = "Tharga.Blazor1 API";
+#if (IncludeEntra)
+    // The rename dialog offers to update the name in Entra too (needs User.ReadWrite.All).
+    o.Blazor.WriteNameToDirectory = true;
+#endif
+#if (IncludeDynamicRoles)
+    // Team administrators can define their own roles at runtime on the Roles page.
+    o.EnableDynamicRoles = true;
+#endif
+
+    // Scopes: Viewer reads, User writes, Administrator manages. Always give a description.
     o.ConfigureScopes = scopes =>
     {
-        scopes.Register(AuditScopes.Read, AccessLevel.User);
+        // audit:read is registered by Tharga.Team itself; registering it again throws at startup.
         scopes.Register(AppAuditScopes.ApiKeyUsage, AccessLevel.User);
-        // Register application-specific scopes here:
-        // scopes.Register("feature:read", AccessLevel.Viewer);
-        // scopes.Register("feature:write", AccessLevel.User);
+        // Register application-specific scopes here, grouped by product area:
+        // scopes.DefineGroup("orders", "Orders");
+        // scopes.Register("orders:read", AccessLevel.Viewer, "View orders.", group: "orders");
+        // scopes.Register("orders:write", AccessLevel.User, "Create and edit orders.", group: "orders");
+        // scopes.Register("orders:manage", AccessLevel.Administrator, "Refund and delete orders.", group: "orders");
     };
 
-    // Tenant roles
+    // Tenant roles: named bundles of scopes that are assigned to team members.
     o.ConfigureTenantRoles = roles =>
     {
         roles.Register("TeamDeveloper", new[] { ApiKeyScopes.Manage });
         // Register application-specific roles here:
-        // roles.Register("Editor", new[] { "feature:read", "feature:write" });
+        // roles.Register("Editor", new[] { "orders:read", "orders:write" }, "Edits orders.");
     };
 
-    // Audit logging
-    o.Audit = new AuditOptions();
+    // System roles: what the Developer role may do across all teams.
+    o.ConfigureSystemRoles = roles =>
+    {
+        roles.Map(Roles.Developer,
+            SystemUserScopes.Manage,
+            AuditScopes.Read,
+            ApiKeyScopes.SystemManage,
+            SystemTeamScopes.Delete
+#if (IncludeMcp)
+            , "mcp:discover"
+#endif
+        );
+    };
+
+    // Audit entries are both logged and stored in MongoDB, so the audit pages have something to show.
+    o.Audit = new AuditOptions { StorageMode = AuditStorageMode.Logger | AuditStorageMode.MongoDB };
 });
 builder.Services.AddThargaTeamRepository(o =>
 {
@@ -78,6 +125,26 @@ builder.Services.AddThargaTeamRepository(o =>
 
 // MongoDB
 builder.AddMongoDB();
+
+#if (IncludeEntra)
+// Entra as the user directory (verify users, list directory-only users, opt-in directory delete).
+// App-only Graph auth needs a client secret, so the directory only lights up when one is configured:
+//   dotnet user-secrets set "AzureAd:ClientSecret" "<secret>"
+// Graph permissions: User.Read.All (verify/list), User.ReadWrite.All (delete, rename).
+if (!string.IsNullOrEmpty(builder.Configuration["AzureAd:ClientSecret"]))
+{
+    builder.Services.AddThargaEntraUserDirectory(builder.Configuration);
+}
+#endif
+
+#if (IncludeMcp)
+// MCP endpoint: lets agents use the app with an API key. AddTeam() contributes the team-aware
+// authentication and the mcp:discover scope. Add your own tools with mcp.AddToolProvider<T>().
+builder.Services.AddThargaMcp(mcp =>
+{
+    mcp.AddTeam();
+});
+#endif
 
 #if (IncludeCache)
 // Tharga.Cache — see https://github.com/Tharga/Cache for documentation.
@@ -143,6 +210,9 @@ app.UseAntiforgery();
 
 // Tharga Team middleware (authentication endpoints, controllers, Swagger)
 app.UseThargaTeam();
+#if (IncludeMcp)
+app.UseThargaMcp();
+#endif
 
 #if (IncludeHealth)
 app.UseQuilt4NetHealth();

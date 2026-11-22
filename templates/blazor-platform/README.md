@@ -37,7 +37,11 @@ dotnet user-secrets set "AzureAd:Authority" "https://your-tenant.ciamlogin.com/y
 dotnet user-secrets set "AzureAd:ClientId" "your-client-id"
 dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id"
 dotnet user-secrets set "ConnectionStrings:Default" "mongodb://localhost:27017/Tharga.Blazor1"
+dotnet user-secrets set "Developers:Emails:0" "you@example.com"
 ```
+
+`Developers:Emails` lists the people who get the **Developer** role, which opens the Developer menu
+(database, users, system API keys, audit, ...). Use the e-mail address you sign in with.
 
 ### 4. Run
 
@@ -90,6 +94,35 @@ Authentication, API controllers, team management, API key auth, scopes, tenant r
 logging are all registered by one call, `builder.AddThargaTeam(...)`, with `app.UseThargaTeam()` in the
 request pipeline (see `Program.cs`). Add your own scopes and roles in the `ConfigureScopes` and
 `ConfigureTenantRoles` callbacks. See [Tharga.Team](https://github.com/Tharga/Team) for the options.
+
+## Template options
+
+Pass these to `dotnet new tharga-blazor-platform`, for example `--IncludeMcp false`.
+
+| Option | Default | What it adds |
+|--------|---------|--------------|
+| `IncludeSamples` | true | Counter and Weather sample pages |
+| `IncludeHealth` | true | Quilt4Net health endpoints |
+| `IncludeRateLimiting` | true | Rate limiting middleware |
+| `IncludeQuilt4Net` | true | Quilt4Net logging, remote configuration and content, plus the log pages |
+| `IncludeCache` | false | Tharga.Cache with a developer page for cache monitoring |
+| `IncludeMcp` | true | An MCP endpoint (`Tharga.Team.Mcp`) so agents can use the app with an API key |
+| `IncludeEntra` | true | The Entra user directory (`Tharga.Team.Entra`). It only activates when `AzureAd:ClientSecret` is set, and then lets the rename dialog update the name in Entra too |
+| `IncludeDynamicRoles` | false | Team administrators can define their own roles at runtime, on a Roles page |
+
+## What is configured out of the box
+
+The defaults follow what the existing Tharga applications have in common:
+
+- **Audit** is logged and stored in MongoDB, so the audit pages have content.
+- **API keys** use advanced mode: access level, roles, scope overrides and tags.
+- **Simulation** lets a team administrator view the app as a less privileged member.
+- **Consent** shows a toggle on the team page; a team can let Developers in to help. Developers do not see
+  every team by default. Set `o.Blazor.Consent.GrantTeamsRead = true` in `Program.cs` if they should.
+- **Developer role** maps to the system scopes for managing users, API keys and teams and for reading audit,
+  and is granted from `Developers:Emails` (see `Framework/DeveloperRoleEnricher.cs`).
+- **Scopes** follow one pattern: Viewer reads, User writes, Administrator manages, each with a description.
+  `Program.cs` has commented examples to copy for your own scopes and roles.
 
 ## Packages
 

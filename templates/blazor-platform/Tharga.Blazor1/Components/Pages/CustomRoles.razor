@@ -1,0 +1,12 @@
+@page "/roles"
+@using Tharga.Team.Blazor.Features.Roles
+@attribute [Authorize(Roles = Roles.TeamMember)]
+
+<PageTitle>Roles</PageTitle>
+
+<RadzenText TextStyle="TextStyle.Body2" class="rz-mb-3">
+    Roles defined at runtime for the selected team. Requires the <code>team:manage</code> scope. Each role can
+    grant any of the scopes the app has registered; assign roles to members on the Team page.
+</RadzenText>
+
+<TenantRoleManager />

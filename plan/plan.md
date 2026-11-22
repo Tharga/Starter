@@ -1,57 +1,45 @@
-# Plan: Update blazor-platform template to current package versions
+# Plan: blazor-platform defaults and options from real projects
+
+Stacked on PR #4 (`feature/update-blazor-platform-packages`).
 
 ## Steps
 
-### 1. Baseline
-- [x] Test baseline on `develop` (2026-11-21): **22 tests, all pass** (Console 6, PackAndInstall 4, Blazor 4, BlazorPlatform 8), ~3.5 min.
-  - The original plan said 47 tests; the real count is 22.
-  - **Run the classes one at a time.** The full-solution run in parallel hung for 46+ min (classes share the global `dotnet new` template store and NuGet). Run per class with `--filter "FullyQualifiedName~.<Class>"` and log to a file; never pipe `dotnet test` through `tail`.
-- [x] NU190x before (default `blazor-platform` project, clean restore): 7 vulnerable packages, all transitive except the first:
-  - Microsoft.AspNetCore.Components.WebAssembly.Server 10.0.6 (High, top-level)
-  - Microsoft.AspNetCore.DataProtection 10.0.0 (**Critical**)
-  - Microsoft.OpenApi 2.4.1 (High)
-  - SharpCompress 0.30.1 (Moderate), Snappier 1.0.0 (High)
-  - System.Security.Cryptography.Pkcs 10.0.0 (High), System.Security.Cryptography.Xml 10.0.0 (High, many advisories)
-  - Reported in the `IntegrationTests` project; `Tests` shows SharpCompress.
+### 1. Survey (read-only)
+- [x] Five existing Tharga applications surveyed: options, scopes, roles, component parameters. Findings are in `feature.md` as counts out of five.
+- [x] User chose: defaults + new options (IncludeMcp, IncludeEntra, IncludeDynamicRoles), on a new branch stacked on PR #4.
 
-### 2. Research the majors
-- [x] Latest stable on nuget.org (2026-11-21): Tharga.Team.* 4.8.1, Tharga.MongoDB.Blazor 2.21.1, Tharga.Toolkit.Standard 1.19.0, Tharga.Cache.Blazor 1.2.1, Quilt4Net.Toolkit.* 1.0.32, Tharga.Blazor 2.5.1, Tharga.Console 4.4.1, Radzen.Blazor 13.2.1, Microsoft.AspNetCore.* 10.0.15 (11.0.0 exists but templates target net10.0, so stay on 10.0.x)
-- [~] Breaking changes that touch the template (reference: `Toolkit/Team/Tharga.Team.Sample/Program.cs`, `docs/articles/getting-started.md`):
-  - Team 4.x: `builder.AddThargaTeam(o => ...)` + `app.UseThargaTeam()` replace AddThargaAuth / AddThargaControllers / AddThargaTeamBlazor / AddThargaApiKeys / AddThargaScopes / AddThargaTenantRoles / AddThargaAuditLogging and UseThargaAuth / UseThargaControllers. Scopes/roles go in `o.ConfigureScopes` / `o.ConfigureTenantRoles`. Verify against the 4.8.1 package, not only the Sample.
-  - Quilt4Net 1.x: `AddQuilt4NetApiLogging` is obsolete, use `AddQuilt4NetLogging().AddHttpRequestLogging()` + `app.UseQuilt4NetLogging()`.
-  - Open: Radzen 10 to 13 and Tharga.Console 3.* to 4.x are major bumps, awaiting the user's decision.
+### 2. Defaults
+- [x] `Program.cs`: audit Logger | MongoDB, `ApiKey.AdvancedMode`, `Controllers.SwaggerTitle`, `Simulation.Enabled`, `Consent.ShowToggle` / `AccessLevel`, `ConfigureSystemRoles` (Developer), `AddClaimsEnricher<DeveloperRoleEnricher>`. `GrantTeamsRead` left off with a comment.
+- [x] `Framework/DeveloperRoleEnricher.cs` grants Developer from `Developers:Emails` (a pattern one of the surveyed applications uses); `appsettings.json` has an empty `Developers:Emails`.
+- [x] Pages: `ApiKeyView` with `ShowRoles` / `ShowScopeOverrides` / `ShowAuditLogButton`, `UsersView ShowAuditLogButton`, new Developer page `SystemApiKeys.razor` with a menu entry, `AccessSimulationBar` in the header.
+- [x] Scope and role examples as commented hints (Viewer / User / Administrator, with descriptions and a group).
 
-### 3. Bump versions
-- [x] Updated `.csproj` files in blazor-platform, blazor and console to the latest stable that works on .NET 10 (user decision: highest possible, keep .NET 10; Microsoft.AspNetCore.* on 10.0.15, not 11.0.0; Radzen 13.2.1; Tharga.Console 4.*).
-- [x] Tharga.Console 4.x supports only net10.0/net11.0 (NU1202 on net9.0), so the **console template and its test project moved from net9.0 to net10.0**. `Tharga.Starter.Tests` (test host, not a template) stays on net9.0; CI already installs the 9.0 and 10.0 SDKs.
+### 3. Options
+- [x] `IncludeMcp` (default true): `Tharga.Team.Mcp`, `AddThargaMcp(mcp.AddTeam())`, `UseThargaMcp()`, `mcp:discover` for Developer.
+- [x] `IncludeEntra` (default true): `Tharga.Team.Entra`, `AddThargaEntraUserDirectory` only when `AzureAd:ClientSecret` is set, `WriteNameToDirectory`.
+- [x] `IncludeDynamicRoles` (default false): `EnableDynamicRoles`, `Components/Pages/CustomRoles.razor` (route `/roles`) with `TenantRoleManager`, menu entry.
 
-### 4. Adapt template code
-- [x] `Program.cs` uses `AddThargaTeam(...)` / `UseThargaTeam()`; scopes, tenant roles and audit moved into its options. Explicit UseRouting/UseAuthentication/UseAuthorization kept.
-- [x] Template's `AuditScopes` clashed with `Tharga.Team.AuditScopes`; renamed to `AppAuditScopes` (only `ApiKeyUsage`), the toolkit's `AuditScopes.Read` is used.
-- [x] `ShowMemberRoles` option removed in Team 4.x; now `ShowRoles="true"` on `TeamComponent` in `Teams.razor`. `ShowScopeOverrides` was false (the default), so unset.
-- [x] Quilt4Net 1.x: `AddQuilt4NetApiLogging` (obsolete) replaced by `AddQuilt4NetLogging().AddHttpRequestLogging()`, plus `app.UseQuilt4NetLogging()` (the old setup never added the middleware).
-- [x] Issue #2: no `AddQuilt4NetContent()` added. In Quilt4Net.Toolkit 1.0.32 `AddQuilt4NetBlazorContent` calls `AddQuilt4NetContent` itself, so the upgrade fixes it. **Not verified at runtime** (needs a running app with `Quilt4Net:ApiKey` only); guarded by a template test that checks the registration is present.
-- [x] Test added: `IncludeQuilt4Net_RegistersContentAndUsesCurrentLogging`. Updated `DefaultOptions_ContainsExpectedStructureAndContent` to the new entry points.
+### 4. Problems found on the way
+- [x] **Startup crash (also in PR #4):** Tharga.Team 4.x registers `audit:read` itself and the template registered it again ("Scope 'audit:read' is already registered"). It compiled and passed the old tests because they only built the project. Removed here. **PR #4 still needs the same one-line fix.**
+- [x] `AccessSimulationBar` rendered as an unknown HTML element (RZ10012 warning) until `@using Tharga.Team.Blazor.Features.Simulation` was added.
+- [x] A page named `Roles.razor` generates a class `Roles` that shadows the toolkit's `Roles` constants inside the page (CS0117). Renamed `CustomRoles.razor`; found by the new startup test, because the page only exists with `IncludeDynamicRoles`.
+- [x] Test helper: build tests took 15 min each instead of 13 s. Cause: MSBuild worker nodes inherit the redirected output pipe and live 15 min idle, and the helper reads the output to the end. Fixed by disabling node reuse, the shared compiler and the MSBuild server for the processes the tests start. Class time went from 15+ min per test to 3.5 min total.
 
-### 5. Verify
-- [x] Full suite, run one class at a time (2026-11-21): **23 tests, all pass** (Console 6, PackAndInstall 4, Blazor 4, BlazorPlatform 9). Baseline was 22; +1 new test.
-- [x] Default `blazor-platform` project builds with 0 errors, 0 warnings, 0 NU190x (including its Tests and IntegrationTests projects).
-- [ ] Explicit `dotnet list package --vulnerable --include-transitive` after the upgrade (not rerun; the clean build above shows no NU190x warnings).
-- [ ] Not covered by a test: IncludeHealth=false alone and IncludeRateLimiting on/off individually (defaults, AllOptionsDisabled, NoSamples and IncludeCache are covered).
-- [ ] Runtime check of the generated app (Radzen 10 to 13 and Team 2 to 4 UI changes are compile-checked only). Needs the user to run it.
+### 5. Tests
+- [x] New: `DefaultOptions_ContainsProjectDefaults`, `DefaultOptions_StartsUp` (runs the generated app's own integration tests with placeholder config), `McpAndEntraDisabled_LeaveNoTraces_AndBuild`, `IncludeDynamicRoles_AddsRolesPage_AndStartsUp`.
+- [~] Full suite one class at a time: platform class 12 of 13 before the `CustomRoles` rename; full rerun in progress.
 
 ### 6. Docs
-- [x] `templates/blazor-platform/README.md`: added how the features are registered (`AddThargaTeam`) and the starting package versions. Root README had nothing version-specific.
+- [x] Template README: options table, what is configured out of the box, `Developers:Emails`.
 
 ### 7. Finish
-- [x] Full test run before commit (23 pass). Commit with conventional message, no attribution lines (user instruction).
-- [~] Push and open PR to `develop` (user approved push and PR).
-- [ ] User tests the generated app; closing (#3, #2, archive plan) only on the user's word
+- [ ] Commit, push, open PR targeting `feature/update-blazor-platform-packages` (retarget to `develop` after PR #4 merges).
+- [ ] The `audit:read` fix on PR #4's branch (separate commit, ask before pushing).
+- [ ] Runtime check by the user: sign in, set `Developers:Emails`, check the Developer menu, system API keys, simulation, MCP endpoint. Not done by me: needs a real identity provider and MongoDB.
 
-## Notes
-- Public repo: no internal project names or tracker numbers beyond the GitHub issue in commit/PR text.
+## Not verified
+- The app has been started only by the generated integration tests (home page) with placeholder config. Sign-in, the Developer role grant, simulation, MCP calls and the Entra directory have not been exercised.
+- `Consent.AccessLevel`, `ShowToggle` and the system role mapping are compile-checked and DI-validated only.
 
 ## Last session
-2026-11-21: Baseline recorded, all templates bumped to latest stable on .NET 10, `blazor-platform` moved to `AddThargaTeam`/`UseThargaTeam` and Quilt4Net 1.x logging, console template moved to net10.0, tests updated (+1), README updated. 23 tests pass. PR opened to `develop`.
-
-Next: the user runs a generated project and checks the UI (Radzen 13, Team 4) and that `Quilt4Net:ApiKey` alone no longer breaks the content connectivity check (#2). Then close #3 and #2 and archive this plan to `plans/Starter/done/` on the user's word. README root/docs need no further change.
+2026-11-22: Feature built, tests extended, README written. Waiting for the full suite, then commit/push/PR.
