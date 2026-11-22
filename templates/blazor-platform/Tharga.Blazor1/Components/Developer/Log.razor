@@ -1,13 +1,22 @@
 @page "/developer/log"
+@using Quilt4Net.Toolkit.Features.ApplicationInsights
+@using Quilt4Net.Toolkit.Blazor.Features.Log
 @attribute [Authorize(Roles = Roles.Developer)]
 @inject BreadCrumbService BreadCrumbService
 
-<Quilt4Net.Toolkit.Blazor.Features.Log.LogView />
+<LogView Context="@ApplicationInsightsContextExtensions.Current"
+         DetailPath="/developer/log/detail"
+         SummaryPath="/developer/log/summary"
+         Tab="@Tab" />
 
 @code {
+    [Parameter, SupplyParameterFromQuery]
+    public string Tab { get; set; }
+
     protected override Task OnInitializedAsync()
     {
         BreadCrumbService.UnlinkSegment("developer");
+        BreadCrumbService.UnlinkSegment("log");
 
         return base.OnInitializedAsync();
     }

@@ -1,0 +1,47 @@
+@page "/developer/log/detail/{Id}"
+@using Quilt4Net.Toolkit.Blazor.Features.Log
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<LogDetailView Id="@Id" Params="@P" SummaryPath="/developer/log/summary" />
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter, SupplyParameterFromQuery]
+    public string P { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+        BreadCrumbService.UnlinkSegment("log");
+        BreadCrumbService.RemoveSegment("detail");
+        BreadCrumbService.RemoveSegment(Id);
+
+        var navParams = LogNavParams.Decode(P);
+        if (navParams.Reference == "Search")
+        {
+            BreadCrumbService.AddVirtualSegment("search", "/developer/log?tab=search");
+            BreadCrumbService.AddVirtualSegment(Id);
+        }
+        else if (navParams.Reference == "Summary" && !string.IsNullOrEmpty(navParams.Fingerprint))
+        {
+            BreadCrumbService.AddVirtualSegment("summary", "/developer/log?tab=summary");
+            BreadCrumbService.AddVirtualSegment(navParams.Fingerprint, $"/developer/log/summary/{navParams.Fingerprint}?p={P}");
+            BreadCrumbService.AddVirtualSegment(Id);
+        }
+        else if (navParams.Reference == "Measure")
+        {
+            BreadCrumbService.AddVirtualSegment("measure", "/developer/log?tab=measure");
+            BreadCrumbService.AddVirtualSegment(Id);
+        }
+        else if (navParams.Reference == "Count")
+        {
+            BreadCrumbService.AddVirtualSegment("count", "/developer/log?tab=count");
+            BreadCrumbService.AddVirtualSegment(Id);
+        }
+
+        await base.OnInitializedAsync();
+    }
+}

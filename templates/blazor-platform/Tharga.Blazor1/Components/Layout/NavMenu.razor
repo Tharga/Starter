@@ -1,4 +1,5 @@
 @using Tharga.Blazor1.Features.Audit
+@using Tharga.Team.Blazor.Features.Simulation
 @inject ILocalStorageService LocalStorageService
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -14,6 +15,7 @@
 //-#if (IncludeQuilt4Net)
             <LanguageSelector />
 //-#endif
+            <AccessSimulationBar ShowEntryPoint="false" />
             <TeamSelector />
             <LoginDisplay />
         </RadzenStack>
@@ -38,6 +40,9 @@
                         <RadzenPanelMenuItem Text="OpenApi" Icon="file_json" Path="/openapi/v1.json" Target="_blank" />
                     </RadzenPanelMenuItem>
                 }
+//-#if (IncludeDynamicRoles)
+                <RadzenPanelMenuItem Text="Roles" Icon="admin_panel_settings" Path="/roles" />
+//-#endif
                 @if (_canViewAudit)
                 {
                     <RadzenPanelMenuItem Text="Audit" Icon="history" Path="/audit" />
@@ -50,6 +55,10 @@
                 <RadzenPanelMenuItem Text="Developer" Icon="logo_dev">
                     <RadzenPanelMenuItem Text="Database" Icon="database" Path="/developer/database" />
                     <RadzenPanelMenuItem Text="Users" Icon="person" Path="/developer/user" />
+                    <RadzenPanelMenuItem Text="System API Keys" Icon="vpn_key" Path="/developer/system-api-keys" />
+//-#if (IncludeCache)
+                    <RadzenPanelMenuItem Text="Cache" Icon="cached" Path="/developer/cache" />
+//-#endif
 //-#if (IncludeQuilt4Net)
                     <RadzenPanelMenuItem Text="Log" Icon="view_object_track" Path="/developer/log" />
                     <RadzenPanelMenuItem Text="Content" Icon="book_2" Path="/developer/content" />
@@ -75,7 +84,7 @@
 
         var user = HttpContextAccessor.HttpContext?.User;
         _canViewAudit = user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.Read) == true
-                     || user?.HasClaim(TeamClaimTypes.Scope, AuditScopes.ApiKeyUsage) == true;
+                     || user?.HasClaim(TeamClaimTypes.Scope, AppAuditScopes.ApiKeyUsage) == true;
         _canManageApiKeys = user?.HasClaim(TeamClaimTypes.Scope, ApiKeyScopes.Manage) == true;
 
         await base.OnInitializedAsync();

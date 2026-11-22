@@ -1,0 +1,21 @@
+@page "/developer/cache"
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<RadzenStack Gap="1rem">
+    <RadzenCard>
+        <Tharga.Cache.Blazor.SummaryView />
+    </RadzenCard>
+    <RadzenCard>
+        <Tharga.Cache.Blazor.ListView />
+    </RadzenCard>
+</RadzenStack>
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}

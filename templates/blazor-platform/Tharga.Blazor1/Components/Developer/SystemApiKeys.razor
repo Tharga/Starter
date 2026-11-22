@@ -1,0 +1,17 @@
+@page "/developer/system-api-keys"
+@using Tharga.Team.Blazor.Features.Api
+@attribute [Authorize(Roles = Roles.Developer)]
+@inject BreadCrumbService BreadCrumbService
+
+<PageTitle>System API Keys</PageTitle>
+
+<SystemApiKeyView ShowScopeOverrides="true" ShowAuditLogButton="true" ShowExpiryDatePicker="true" />
+
+@code {
+    protected override Task OnInitializedAsync()
+    {
+        BreadCrumbService.UnlinkSegment("developer");
+
+        return base.OnInitializedAsync();
+    }
+}

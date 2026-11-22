@@ -36,6 +36,30 @@
       "defaultValue": "true",
       "description": "Include Quilt4Net logging, remote configuration, and content"
     },
+    "IncludeCache": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include Tharga.Cache with a developer page for cache monitoring"
+    },
+    "IncludeMcp": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include an MCP endpoint (Tharga.Team.Mcp) so agents can use the app with an API key"
+    },
+    "IncludeEntra": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include the Entra user directory (Tharga.Team.Entra), active once AzureAd:ClientSecret is set"
+    },
+    "IncludeDynamicRoles": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Let team administrators define their own roles at runtime, with a Roles page"
+    },
     "httpPort": {
       "type": "generated",
       "generator": "port",
@@ -96,8 +120,22 @@
           "condition": "(!IncludeQuilt4Net)",
           "exclude": [
             "Tharga.Blazor1/Components/Developer/Log.razor",
+            "Tharga.Blazor1/Components/Developer/LogDetail.razor",
+            "Tharga.Blazor1/Components/Developer/LogSummary.razor",
             "Tharga.Blazor1/Components/Developer/Content.razor",
             "Tharga.Blazor1/Components/Developer/Configuration.razor"
+          ]
+        },
+        {
+          "condition": "(!IncludeCache)",
+          "exclude": [
+            "Tharga.Blazor1/Components/Developer/Cache.razor"
+          ]
+        },
+        {
+          "condition": "(!IncludeDynamicRoles)",
+          "exclude": [
+            "Tharga.Blazor1/Components/Pages/CustomRoles.razor"
           ]
         }
       ]

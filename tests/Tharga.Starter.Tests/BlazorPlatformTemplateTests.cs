@@ -69,13 +69,18 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
 
         // Program.cs — all platform registrations, no template directives
         var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformCheck", "Program.cs"));
-        Assert.Contains("AddThargaAuth", program);
-        Assert.Contains("AddThargaControllers", program);
-        Assert.Contains("AddThargaTeamBlazor", program);
-        Assert.Contains("AddThargaApiKeys", program);
-        Assert.Contains("AddThargaScopes", program);
-        Assert.Contains("AddThargaTenantRoles", program);
-        Assert.Contains("AddThargaAuditLogging", program);
+        // Tharga.Team 4.x registers auth, API keys, controllers, team UI, scopes, roles and audit through one entry point.
+        Assert.Contains("AddThargaTeam(", program);
+        Assert.Contains("UseThargaTeam()", program);
+        Assert.Contains("ConfigureScopes", program);
+        Assert.Contains("ConfigureTenantRoles", program);
+        Assert.Contains("o.Audit", program);
+        Assert.DoesNotContain("AddThargaAuth(", program);
+        Assert.DoesNotContain("AddThargaTeamBlazor(", program);
+        Assert.DoesNotContain("AddThargaControllers(", program);
+
+        // Tharga.Team registers audit:read itself; registering it again throws at startup.
+        Assert.DoesNotContain("scopes.Register(AuditScopes.Read", program);
         Assert.DoesNotContain("#if", program);
         Assert.DoesNotContain("#endif", program);
 
@@ -110,11 +115,182 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
 
         // Quilt4Net pages excluded
         Assert.False(File.Exists(Path.Combine(projectPath, "PlatformMin", "Components", "Developer", "Log.razor")));
+        Assert.False(File.Exists(Path.Combine(projectPath, "PlatformMin", "Components", "Developer", "LogDetail.razor")));
+        Assert.False(File.Exists(Path.Combine(projectPath, "PlatformMin", "Components", "Developer", "LogSummary.razor")));
         Assert.False(File.Exists(Path.Combine(projectPath, "PlatformMin", "Components", "Developer", "Content.razor")));
         Assert.False(File.Exists(Path.Combine(projectPath, "PlatformMin", "Components", "Developer", "Configuration.razor")));
 
         // NavMenu excludes LanguageSelector
         var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformMin", "Components", "Layout", "NavMenu.razor"));
         Assert.DoesNotContain("LanguageSelector", navMenu);
+    }
+
+    [Fact]
+    public async Task IncludeQuilt4Net_RegistersContentAndUsesCurrentLogging()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformQ4N", "--IncludeQuilt4Net true");
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformQ4N", "Program.cs"));
+
+        // Content options must be registered, or IConnectionService throws on Service.Content when
+        // Quilt4Net:Content is not configured (Tharga/Starter#2). Quilt4Net.Toolkit 1.x registers them
+        // from AddQuilt4NetBlazorContent; a host that calls neither gets a null content address.
+        Assert.True(program.Contains("AddQuilt4NetBlazorContent") || program.Contains("AddQuilt4NetContent"),
+            "Program.cs must register Quilt4Net content.");
+        Assert.Contains("AddQuilt4NetRemoteConfiguration", program);
+
+        // Current logging entry points; AddQuilt4NetApiLogging is obsolete in Quilt4Net.Toolkit 1.x.
+        Assert.Contains("AddQuilt4NetLogging", program);
+        Assert.Contains("AddHttpRequestLogging", program);
+        Assert.Contains("UseQuilt4NetLogging", program);
+        Assert.DoesNotContain("AddQuilt4NetApiLogging", program);
+    }
+
+    [Fact]
+    public async Task DefaultOptions_ContainsProjectDefaults()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformDefaults");
+        var root = Path.Combine(projectPath, "PlatformDefaults");
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+
+        // Configuration the existing Tharga projects have converged on.
+        Assert.Contains("o.ApiKey.AdvancedMode = true", program);
+        Assert.Contains("o.Blazor.Simulation.Enabled = true", program);
+        Assert.Contains("o.Blazor.Consent.ShowToggle = true", program);
+        Assert.Contains("o.Blazor.Consent.AccessLevel = AccessLevel.Administrator", program);
+        Assert.Contains("AuditStorageMode.Logger | AuditStorageMode.MongoDB", program);
+        Assert.Contains("o.Controllers.SwaggerTitle", program);
+        Assert.Contains("AddClaimsEnricher<DeveloperRoleEnricher>", program);
+        Assert.Contains("ConfigureSystemRoles", program);
+        Assert.Contains("Roles.Developer", program);
+
+        // Tharga.Team registers audit:read itself; registering it again throws at startup.
+        Assert.DoesNotContain("scopes.Register(AuditScopes.Read", program);
+
+        // Optional modules on by default, dynamic roles off.
+        Assert.Contains("AddThargaMcp", program);
+        Assert.Contains("UseThargaMcp", program);
+        Assert.Contains("AddThargaEntraUserDirectory", program);
+        Assert.DoesNotContain("EnableDynamicRoles", program);
+        Assert.False(File.Exists(Path.Combine(root, "Components", "Pages", "CustomRoles.razor")));
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(root, "PlatformDefaults.csproj"));
+        Assert.Contains("Tharga.Team.Mcp", csproj);
+        Assert.Contains("Tharga.Team.Entra", csproj);
+
+        // Pages and the role grant
+        Assert.True(File.Exists(Path.Combine(root, "Framework", "DeveloperRoleEnricher.cs")));
+        Assert.True(File.Exists(Path.Combine(root, "Components", "Developer", "SystemApiKeys.razor")));
+        var apiKeys = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Pages", "ApiKeys.razor"));
+        Assert.Contains("ShowRoles=\"true\"", apiKeys);
+        Assert.Contains("ShowScopeOverrides=\"true\"", apiKeys);
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("AccessSimulationBar", navMenu);
+        Assert.DoesNotContain("\"/roles\"", navMenu);
+        var settings = await File.ReadAllTextAsync(Path.Combine(root, "appsettings.json"));
+        Assert.Contains("Developers", settings);
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task DefaultOptions_StartsUp()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformStart");
+        await TemplateTestHelper.AssertGeneratedAppStartsAsync(projectPath, "PlatformStart");
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task McpAndEntraDisabled_LeaveNoTraces_AndBuild()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNoMods", "--IncludeMcp false --IncludeEntra false");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+
+        var root = Path.Combine(projectPath, "PlatformNoMods");
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+        Assert.DoesNotContain("AddThargaMcp", program);
+        Assert.DoesNotContain("UseThargaMcp", program);
+        Assert.DoesNotContain("mcp:discover", program);
+        Assert.DoesNotContain("AddThargaEntraUserDirectory", program);
+        Assert.DoesNotContain("WriteNameToDirectory", program);
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(root, "PlatformNoMods.csproj"));
+        Assert.DoesNotContain("Tharga.Team.Mcp", csproj);
+        Assert.DoesNotContain("Tharga.Team.Entra", csproj);
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task IncludeDynamicRoles_AddsRolesPage_AndStartsUp()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformRoles", "--IncludeDynamicRoles true");
+        var root = Path.Combine(projectPath, "PlatformRoles");
+
+        var program = await File.ReadAllTextAsync(Path.Combine(root, "Program.cs"));
+        Assert.Contains("o.EnableDynamicRoles = true", program);
+        Assert.True(File.Exists(Path.Combine(root, "Components", "Pages", "CustomRoles.razor")));
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(root, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("\"/roles\"", navMenu);
+
+        await TemplateTestHelper.AssertGeneratedAppStartsAsync(projectPath, "PlatformRoles");
+    }
+
+    [Fact]
+    public async Task DatabasePageHasMonitorToolbar()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformDb");
+        var db = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformDb", "Components", "Developer", "Database.razor"));
+        Assert.Contains("MonitorToolbar", db);
+        Assert.Contains("OnCallsReset", db);
+        Assert.Contains("OnCacheReset", db);
+    }
+
+    [Fact]
+    public async Task LogPageSupportsDeepLinking()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformLog");
+        var log = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformLog", "Components", "Developer", "Log.razor"));
+        Assert.Contains("DetailPath=\"/developer/log/detail\"", log);
+        Assert.Contains("SummaryPath=\"/developer/log/summary\"", log);
+        Assert.Contains("Tab=\"@Tab\"", log);
+
+        Assert.True(File.Exists(Path.Combine(projectPath, "PlatformLog", "Components", "Developer", "LogDetail.razor")));
+        Assert.True(File.Exists(Path.Combine(projectPath, "PlatformLog", "Components", "Developer", "LogSummary.razor")));
+    }
+
+    [Fact]
+    [Trait("Category", "Slow")]
+    public async Task IncludeCache_BuildsAndContainsCacheArtifacts()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformCache",
+            "--IncludeCache true");
+        await TemplateTestHelper.AssertBuildsAsync(projectPath);
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformCache", "PlatformCache.csproj"));
+        Assert.Contains("Tharga.Cache.Blazor", csproj);
+
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformCache", "Program.cs"));
+        Assert.Contains("AddCache()", program);
+
+        Assert.True(File.Exists(Path.Combine(projectPath, "PlatformCache", "Components", "Developer", "Cache.razor")));
+
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformCache", "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("/developer/cache", navMenu);
+    }
+
+    [Fact]
+    public async Task ExcludeCache_ExcludesCacheArtifacts()
+    {
+        var projectPath = await TemplateTestHelper.CreateProjectAsync(_tempDir, "tharga-blazor-platform", "PlatformNoCache");
+
+        var csproj = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformNoCache", "PlatformNoCache.csproj"));
+        Assert.DoesNotContain("Tharga.Cache", csproj);
+
+        var program = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformNoCache", "Program.cs"));
+        Assert.DoesNotContain("AddCache()", program);
+
+        Assert.False(File.Exists(Path.Combine(projectPath, "PlatformNoCache", "Components", "Developer", "Cache.razor")));
+
+        var navMenu = await File.ReadAllTextAsync(Path.Combine(projectPath, "PlatformNoCache", "Components", "Layout", "NavMenu.razor"));
+        Assert.DoesNotContain("/developer/cache", navMenu);
     }
 }
