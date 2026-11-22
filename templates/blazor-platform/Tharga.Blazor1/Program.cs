@@ -52,7 +52,7 @@ builder.AddThargaTeam(o =>
     // Scopes
     o.ConfigureScopes = scopes =>
     {
-        scopes.Register(AuditScopes.Read, AccessLevel.User);
+        // audit:read is registered by Tharga.Team itself; registering it again throws at startup.
         scopes.Register(AppAuditScopes.ApiKeyUsage, AccessLevel.User);
         // Register application-specific scopes here:
         // scopes.Register("feature:read", AccessLevel.Viewer);

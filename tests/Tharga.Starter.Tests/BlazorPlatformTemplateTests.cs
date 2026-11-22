@@ -78,6 +78,9 @@ public class BlazorPlatformTemplateTests : IAsyncLifetime
         Assert.DoesNotContain("AddThargaAuth(", program);
         Assert.DoesNotContain("AddThargaTeamBlazor(", program);
         Assert.DoesNotContain("AddThargaControllers(", program);
+
+        // Tharga.Team registers audit:read itself; registering it again throws at startup.
+        Assert.DoesNotContain("scopes.Register(AuditScopes.Read", program);
         Assert.DoesNotContain("#if", program);
         Assert.DoesNotContain("#endif", program);
 
